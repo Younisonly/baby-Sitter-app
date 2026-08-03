@@ -192,17 +192,6 @@
             box-shadow: 0 14px 28px -10px rgb(44 166 164 / 0.75);
         }
 
-        .btn-ghost {
-            border: 1px solid var(--border);
-            color: var(--muted);
-            background: transparent;
-        }
-
-        .btn-ghost:hover {
-            border-color: var(--grad-a);
-            color: var(--grad-a);
-        }
-
         .btn svg {
             width: 16px;
             height: 16px;
@@ -238,9 +227,6 @@
                     {{-- back-to-dashboard --}}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>
                     Back to Dashboard
-                </a>
-                <a class="btn btn-ghost" href="{{ url('/') }}">
-                    Go Home
                 </a>
             </div>
         </div>
