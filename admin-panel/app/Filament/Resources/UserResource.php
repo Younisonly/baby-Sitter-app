@@ -382,6 +382,7 @@ class UserResource extends Resource
                 ]),
             ])
             ->headerActions([
+                Tables\Actions\CreateAction::make(),
                 Tables\Actions\Action::make('create_admin')
                     ->label('Create Admin')
                     ->icon('heroicon-o-user-plus')

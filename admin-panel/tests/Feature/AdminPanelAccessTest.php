@@ -52,6 +52,16 @@ class AdminPanelAccessTest extends TestCase
         $this->get('/admin/users/create-admin')->assertSuccessful();
     }
 
+    public function test_users_table_header_shows_both_buttons_for_super_admin(): void
+    {
+        $super = User::where('email', 'superadmin@babysitter.com')->firstOrFail();
+        $this->actingAs($super);
+        $response = $this->get('/admin/users');
+        $response->assertSuccessful();
+        $this->assertStringContainsString('New user', $response->getContent());
+        $this->assertStringContainsString('Create Admin', $response->getContent());
+    }
+
     public function test_normal_admin_cannot_open_create_admin_page(): void
     {
         $admin = User::where('email', 'admin@babysitter.com')->firstOrFail();
