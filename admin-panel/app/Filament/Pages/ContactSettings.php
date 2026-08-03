@@ -15,8 +15,12 @@ class ContactSettings extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-phone';
-    protected static ?string $navigationGroup = 'Configuration';
     protected static ?int $navigationSort = 5;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.Configuration');
+    }
     protected static string $view = 'filament.pages.contact-settings';
 
     public ?array $data = [];

@@ -18,8 +18,17 @@ class BookingResource extends Resource
     protected static ?string $model = Booking::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
-    protected static ?string $navigationGroup = 'Bookings';
     protected static ?string $recordTitleAttribute = 'booking_number';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.Bookings');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.Bookings');
+    }
 
     public static function form(Form $form): Form
     {

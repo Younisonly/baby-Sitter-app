@@ -53,11 +53,11 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
             ])
             ->navigationGroups([
-                __('admin.navigation.groups.User Management'),
-                __('admin.navigation.groups.Bookings'),
-                __('admin.navigation.groups.Content'),
-                __('admin.navigation.groups.Communication'),
-                __('admin.navigation.groups.Configuration'),
+                NavigationGroup::make(fn (): ?string => __('admin.navigation.groups.User Management')),
+                NavigationGroup::make(fn (): ?string => __('admin.navigation.groups.Bookings')),
+                NavigationGroup::make(fn (): ?string => __('admin.navigation.groups.Content')),
+                NavigationGroup::make(fn (): ?string => __('admin.navigation.groups.Communication')),
+                NavigationGroup::make(fn (): ?string => __('admin.navigation.groups.Configuration')),
             ])
             ->userMenuItems([
                 MenuItem::make()

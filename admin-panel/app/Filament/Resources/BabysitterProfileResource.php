@@ -18,8 +18,17 @@ class BabysitterProfileResource extends Resource
     protected static ?string $model = BabysitterProfile::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
-    protected static ?string $navigationGroup = 'User Management';
     protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.navigation.groups.User Management');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin.navigation.resources.Babysitter Profiles');
+    }
 
     public static function form(Form $form): Form
     {

@@ -16,7 +16,6 @@ class BroadcastNotification extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
-    protected static ?string $navigationGroup = 'Communication';
     protected static ?int $navigationSort = 10;
     protected static string $view = 'filament.pages.broadcast-notification';
 
