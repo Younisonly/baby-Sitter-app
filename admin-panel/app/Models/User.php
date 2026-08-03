@@ -16,7 +16,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role === 'admin' && !$this->is_suspended;
+        return $this->isAdmin() && !$this->is_suspended;
     }
 
     protected $fillable = [
@@ -81,6 +81,16 @@ class User extends Authenticatable implements FilamentUser
     }
 
     public function isAdmin(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin'], true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isPanelAdmin(): bool
     {
         return $this->role === 'admin';
     }

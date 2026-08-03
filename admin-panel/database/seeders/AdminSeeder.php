@@ -9,7 +9,7 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@babysitter.com'],
             [
                 'name' => 'Admin',
@@ -21,12 +21,12 @@ class AdminSeeder extends Seeder
             ]
         );
 
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'superadmin@babysitter.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('SuperAdmin123'),
-                'role' => 'admin',
+                'role' => 'super_admin',
                 'email_verified_at' => now(),
                 'verification_status' => 'verified',
                 'preferred_language' => 'en',

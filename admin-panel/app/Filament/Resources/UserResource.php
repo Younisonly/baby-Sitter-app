@@ -21,6 +21,51 @@ class UserResource extends Resource
     protected static ?string $navigationGroup = 'User Management';
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function canViewAny(): bool
+    {
+        return (bool) auth()->user()?->isAdmin();
+    }
+
+    public static function canView($record): bool
+    {
+        $user = auth()->user();
+        if ($user?->isSuperAdmin()) {
+            return true;
+        }
+
+        return $record->id === $user?->id || ! in_array($record->role, ['super_admin', 'admin'], true);
+    }
+
+    public static function canCreate(): bool
+    {
+        return (bool) auth()->user()?->isAdmin();
+    }
+
+    public static function canEdit($record): bool
+    {
+        $user = auth()->user();
+        if ($user?->isSuperAdmin()) {
+            return true;
+        }
+
+        return $record->id === $user?->id || ! in_array($record->role, ['super_admin', 'admin'], true);
+    }
+
+    public static function canDelete($record): bool
+    {
+        $user = auth()->user();
+        if ($record->id === $user?->id) {
+            return false;
+        }
+
+        return $user?->isSuperAdmin() || ! in_array($record->role, ['super_admin', 'admin'], true);
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return (bool) auth()->user()?->isSuperAdmin();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -88,11 +133,25 @@ class UserResource extends Resource
                     ->columns(2)
                     ->schema([
                         Forms\Components\Select::make('role')
-                            ->options([
-                                'customer' => 'Customer',
-                                'babysitter' => 'Babysitter',
-                                'admin' => 'Admin',
-                            ])
+                            ->options(function (): array {
+                                if (auth()->user()?->isSuperAdmin()) {
+                                    return [
+                                        'super_admin' => 'Super Admin',
+                                        'admin' => 'Admin',
+                                        'babysitter' => 'Babysitter',
+                                        'customer' => 'Customer',
+                                    ];
+                                }
+
+                                return [
+                                    'babysitter' => 'Babysitter',
+                                    'customer' => 'Customer',
+                                ];
+                            })
+                            ->disabled(fn (?User $record): bool => $record !== null && $record->id === auth()->id())
+                            ->helperText(fn (?User $record): ?string => $record !== null && $record->id === auth()->id()
+                                ? 'You cannot change your own role.'
+                                : null)
                             ->required(),
                         Forms\Components\Select::make('verification_status')
                             ->options([
@@ -136,6 +195,11 @@ class UserResource extends Resource
     {
         return $table
             ->defaultSort('created_at', 'desc')
+            ->modifyQueryUsing(
+                fn (Builder $query): Builder => auth()->user()?->isSuperAdmin()
+                    ? $query
+                    : $query->whereNotIn('role', ['super_admin', 'admin']),
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -149,8 +213,9 @@ class UserResource extends Resource
                         'gray' => 'customer',
                         'primary' => 'babysitter',
                         'danger' => 'admin',
+                        'success' => 'super_admin',
                     ])
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                    ->formatStateUsing(fn (string $state): string => $state === 'super_admin' ? 'Super Admin' : ucfirst($state)),
                 Tables\Columns\TextColumn::make('verification_status')
                     ->badge()
                     ->colors([
@@ -202,11 +267,17 @@ class UserResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
-                    ->options([
-                        'customer' => 'Customer',
-                        'babysitter' => 'Babysitter',
-                        'admin' => 'Admin',
-                    ]),
+                    ->options(fn (): array => auth()->user()?->isSuperAdmin()
+                        ? [
+                            'super_admin' => 'Super Admin',
+                            'admin' => 'Admin',
+                            'babysitter' => 'Babysitter',
+                            'customer' => 'Customer',
+                        ]
+                        : [
+                            'babysitter' => 'Babysitter',
+                            'customer' => 'Customer',
+                        ]),
                 Tables\Filters\SelectFilter::make('verification_status')
                     ->options([
                         'unverified' => 'Unverified',
@@ -283,7 +354,7 @@ class UserResource extends Resource
                             'suspended_at' => now(),
                         ]);
                     })
-                    ->visible(fn (User $record): bool => !$record->is_suspended),
+                    ->visible(fn (User $record): bool => ! $record->is_suspended && $record->id !== auth()->id()),
                 Tables\Actions\Action::make('Reinstate')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -295,7 +366,7 @@ class UserResource extends Resource
                             'suspended_at' => null,
                         ]);
                     })
-                    ->visible(fn (User $record): bool => $record->is_suspended),
+                    ->visible(fn (User $record): bool => $record->is_suspended && $record->id !== auth()->id()),
                 Tables\Actions\Action::make('Verify Email')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
