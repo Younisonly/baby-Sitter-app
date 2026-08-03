@@ -27,6 +27,7 @@ return [
             'Reschedule Requests' => 'طلبات إعادة الجدولة',
             'FAQs' => 'الأسئلة الشائعة',
             'Contact Settings' => 'إعدادات التواصل',
+            'Create Admin' => 'إنشاء مدير',
         ],
     ],
 
@@ -317,5 +318,27 @@ return [
         'customer' => 'عميل',
         'babysitter' => 'مربية',
         'admin' => 'مدير',
+        'super_admin' => 'مدير عام',
+    ],
+
+    'pages' => [
+        'create_admin' => [
+            'title' => 'إنشاء مدير',
+            'submit' => 'إنشاء مدير',
+            'success_title' => 'تم إنشاء المدير بنجاح',
+            'success_body' => 'تم إنشاء :name بصلاحية :role.',
+            'fields' => [
+                'name' => 'الاسم الكامل',
+                'email' => 'البريد الإلكتروني',
+                'phone' => 'الهاتف (اختياري)',
+                'password' => 'كلمة المرور',
+                'password_confirmation' => 'تأكيد كلمة المرور',
+                'role' => 'الصلاحية',
+            ],
+            'roles' => [
+                'admin' => 'مدير',
+                'super_admin' => 'مدير عام',
+            ],
+        ],
     ],
 ];

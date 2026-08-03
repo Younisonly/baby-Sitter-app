@@ -27,6 +27,7 @@ return [
             'Reschedule Requests' => 'Reschedule Requests',
             'FAQs' => 'FAQs',
             'Contact Settings' => 'Contact Settings',
+            'Create Admin' => 'Create Admin',
         ],
     ],
 
@@ -317,5 +318,27 @@ return [
         'customer' => 'Customer',
         'babysitter' => 'Babysitter',
         'admin' => 'Admin',
+        'super_admin' => 'Super Admin',
+    ],
+
+    'pages' => [
+        'create_admin' => [
+            'title' => 'Create Admin',
+            'submit' => 'Create Admin',
+            'success_title' => 'Admin created successfully',
+            'success_body' => ':name has been created as :role.',
+            'fields' => [
+                'name' => 'Full Name',
+                'email' => 'Email Address',
+                'phone' => 'Phone (optional)',
+                'password' => 'Password',
+                'password_confirmation' => 'Confirm Password',
+                'role' => 'Role',
+            ],
+            'roles' => [
+                'admin' => 'Admin',
+                'super_admin' => 'Super Admin',
+            ],
+        ],
     ],
 ];

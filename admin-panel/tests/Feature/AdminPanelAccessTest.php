@@ -44,4 +44,18 @@ class AdminPanelAccessTest extends TestCase
         $this->actingAs($customer);
         $this->get('/admin/users')->assertForbidden();
     }
+
+    public function test_super_admin_can_open_create_admin_page(): void
+    {
+        $super = User::where('email', 'superadmin@babysitter.com')->firstOrFail();
+        $this->actingAs($super);
+        $this->get('/admin/users/create-admin')->assertSuccessful();
+    }
+
+    public function test_normal_admin_cannot_open_create_admin_page(): void
+    {
+        $admin = User::where('email', 'admin@babysitter.com')->firstOrFail();
+        $this->actingAs($admin);
+        $this->get('/admin/users/create-admin')->assertForbidden();
+    }
 }

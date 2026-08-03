@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Pages\CreateAdmin;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -379,6 +380,14 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('create_admin')
+                    ->label('Create Admin')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('primary')
+                    ->visible(fn (): bool => (bool) auth()->user()?->isSuperAdmin())
+                    ->url(fn (): string => CreateAdmin::getUrl()),
             ]);
     }
 
