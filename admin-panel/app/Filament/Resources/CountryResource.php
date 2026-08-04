@@ -23,7 +23,7 @@ class CountryResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.Configuration');
+        return 'Configuration';
     }
 
     public static function getModelLabel(): string

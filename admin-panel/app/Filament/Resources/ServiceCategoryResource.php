@@ -20,7 +20,7 @@ class ServiceCategoryResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.Content');
+        return 'Content';
     }
 
     public static function getModelLabel(): string

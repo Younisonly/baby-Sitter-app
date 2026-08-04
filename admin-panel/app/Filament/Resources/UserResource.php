@@ -24,7 +24,7 @@ class UserResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.User Management');
+        return 'User Management';
     }
 
     public static function getPluralModelLabel(): string

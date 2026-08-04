@@ -23,7 +23,7 @@ class ConversationResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.Communication');
+        return 'Communication';
     }
 
     public static function getModelLabel(): string

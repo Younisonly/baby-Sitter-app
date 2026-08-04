@@ -23,7 +23,7 @@ class RescheduleRequestResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.Bookings');
+        return 'Bookings';
     }
 
     public static function getModelLabel(): string

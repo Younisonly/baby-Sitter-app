@@ -19,7 +19,7 @@ class ContactSettings extends Page implements HasForms
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.Configuration');
+        return 'Configuration';
     }
     protected static string $view = 'filament.pages.contact-settings';
 

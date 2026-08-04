@@ -21,7 +21,7 @@ class CreateAdmin extends Page implements HasForms
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.User Management');
+        return 'User Management';
     }
     protected static string $view = 'filament.pages.create-admin';
     protected static ?string $slug = 'users/create-admin';

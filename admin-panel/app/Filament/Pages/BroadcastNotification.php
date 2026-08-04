@@ -23,7 +23,7 @@ class BroadcastNotification extends Page implements HasForms
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.Communication');
+        return 'Communication';
     }
 
     public static function getNavigationLabel(): string
