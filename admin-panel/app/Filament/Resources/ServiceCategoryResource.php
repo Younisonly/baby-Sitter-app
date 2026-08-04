@@ -15,6 +15,7 @@ class ServiceCategoryResource extends Resource
     protected static ?string $model = ServiceCategory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?int $navigationSort = 210;
     protected static ?string $recordTitleAttribute = 'label';
 
     public static function getNavigationGroup(): ?string

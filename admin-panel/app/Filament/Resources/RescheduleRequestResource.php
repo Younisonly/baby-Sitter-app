@@ -18,6 +18,7 @@ class RescheduleRequestResource extends Resource
     protected static ?string $model = RescheduleRequest::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static ?int $navigationSort = 120;
     protected static ?string $recordTitleAttribute = 'id';
 
     public static function getNavigationGroup(): ?string

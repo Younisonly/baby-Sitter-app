@@ -18,6 +18,7 @@ class CancellationPolicyResource extends Resource
     protected static ?string $model = CancellationPolicy::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?int $navigationSort = 400;
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getNavigationGroup(): ?string

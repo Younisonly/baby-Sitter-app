@@ -15,7 +15,7 @@ class ContactSettings extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-phone';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 440;
 
     public static function getNavigationGroup(): ?string
     {

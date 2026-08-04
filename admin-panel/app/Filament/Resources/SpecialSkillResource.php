@@ -15,6 +15,7 @@ class SpecialSkillResource extends Resource
     protected static ?string $model = SpecialSkill::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-sparkles';
+    protected static ?int $navigationSort = 220;
     protected static ?string $recordTitleAttribute = 'label';
 
     public static function getNavigationGroup(): ?string

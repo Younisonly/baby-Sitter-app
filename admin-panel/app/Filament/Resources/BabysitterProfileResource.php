@@ -18,6 +18,7 @@ class BabysitterProfileResource extends Resource
     protected static ?string $model = BabysitterProfile::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static ?int $navigationSort = 10;
     protected static ?string $recordTitleAttribute = 'id';
 
     public static function getNavigationGroup(): ?string

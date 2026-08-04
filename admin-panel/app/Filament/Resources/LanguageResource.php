@@ -18,6 +18,7 @@ class LanguageResource extends Resource
     protected static ?string $model = Language::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-language';
+    protected static ?int $navigationSort = 430;
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getNavigationGroup(): ?string

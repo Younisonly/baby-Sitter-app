@@ -18,6 +18,7 @@ class CountryResource extends Resource
     protected static ?string $model = Country::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+    protected static ?int $navigationSort = 420;
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getNavigationGroup(): ?string

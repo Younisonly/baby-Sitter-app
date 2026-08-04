@@ -18,6 +18,7 @@ class ConversationResource extends Resource
     protected static ?string $model = Conversation::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static ?int $navigationSort = 300;
     protected static ?string $recordTitleAttribute = 'id';
 
     public static function getNavigationGroup(): ?string

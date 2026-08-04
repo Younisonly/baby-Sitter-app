@@ -22,58 +22,77 @@ class AdminSideNavTest extends TestCase
         ]);
     }
 
-    private function outFile(): string
+    /**
+     * @return array{groups: string[], items: string[]}
+     */
+private function renderSidebar(string $locale): array
     {
-        return storage_path('app/nav_%s.json');
-    }
-
-    private function renderAndSave(string $locale, string $fileKey): void
-    {
+        $this->refreshApplication();
         $admin = $this->makeAdmin();
-        $this->actingAs($admin)->get('/admin/locale/' . $locale);
-        $html = $this->get('/admin')->getContent();
-
-        preg_match_all('/data-group-label="([^"]*)"/', $html, $g);
-        preg_match_all('/class="fi-sidebar-item-label[^"]*"[^>]*>(.*?)</s', $html, $i);
-
-        $out = [
-            'groups' => array_map(fn ($x) => trim(strip_tags($x)), $g[1]),
-            'items' => array_map(fn ($x) => trim(strip_tags($x)), $i[1]),
-        ];
-        file_put_contents(sprintf($this->outFile(), $fileKey), json_encode($out));
+        $this->actingAs($admin)->withSession(['admin_locale' => $locale]);
+        $response = $this->get('/admin');
+        $html = $response->getContent();
         $admin->forceDelete();
+
+        preg_match_all('/data-group-label="([^"]*)"/', $html, $groups);
+        preg_match_all('/class="fi-sidebar-item-label[^"]*"[^>]*>(.*?)</s', $html, $items);
+
+        return [
+            'groups' => array_map(fn (string $x): string => trim(strip_tags($x)), $groups[1]),
+            'items' => array_map(fn (string $x): string => trim(strip_tags($x)), $items[1]),
+        ];
     }
 
-    public function test_en_output(): void
-    {
-        $this->renderAndSave('en', 'en');
-        $this->assertTrue(true);
-    }
-
-    public function test_ar_output(): void
-    {
-        $this->renderAndSave('ar', 'ar');
-        $this->assertTrue(true);
-    }
-
-    public function test_compare_en_ar(): void
-    {
-        $en = json_decode(file_get_contents(sprintf($this->outFile(), 'en')), true);
-        $ar = json_decode(file_get_contents(sprintf($this->outFile(), 'ar')), true);
-
-        fwrite(STDERR, "\n=== en ===\nGROUPS: " . implode(' | ', $en['groups']) . "\nITEMS: " . implode(' | ', $en['items']) . "\n");
-        fwrite(STDERR, "=== ar ===\nGROUPS: " . implode(' | ', $ar['groups']) . "\nITEMS: " . implode(' | ', $ar['items']) . "\n");
-
-        $this->assertSame($en['groups'], $this->toEnSemantics($ar['groups'], 'groups'), 'Group order differs.');
-        $this->assertSame($en['items'], $this->toEnSemantics($ar['items'], 'resources'), 'Item order differs.');
-    }
-
+    /**
+     * Map localized sidebar labels back to their English (EN) keys so that
+     * AR and EN renderings can be compared positionally.
+     *
+     * @param  string[]  $localized
+     * @return string[]
+     */
     private function toEnSemantics(array $localized, string $section): array
     {
         $ar = require lang_path('ar/admin.php');
         $inverse = array_flip($ar['navigation'][$section] ?? []);
         $inverse['لوحة التحكم'] = 'Dashboard';
 
-        return array_map(fn($v) => $inverse[$v] ?? $v, $localized);
+        return array_map(fn (string $value): string => $inverse[$value] ?? $value, $localized);
+    }
+
+    public function test_sidebar_group_and_item_order_is_identical_in_en_and_ar(): void
+    {
+        $en = $this->renderSidebar('en');
+        $ar = $this->renderSidebar('ar');
+
+        $mappedArGroups = $this->toEnSemantics($ar['groups'], 'groups');
+        $mappedArItems = $this->toEnSemantics($ar['items'], 'resources');
+
+        $this->assertSame(
+            $en['groups'],
+            $mappedArGroups,
+            'Group order differs between EN and AR.',
+        );
+        $this->assertSame(
+            $en['items'],
+            $mappedArItems,
+            'Item order differs between EN and AR.',
+        );
+    }
+
+    public function test_every_sidebar_item_is_localized_in_ar(): void
+    {
+        $ar = require lang_path('ar/admin.php');
+        $allowedGroups = [...array_values($ar['navigation']['groups']), ''];
+        $allowedItems = [...array_values($ar['navigation']['resources']), 'لوحة التحكم'];
+
+        $rendered = $this->renderSidebar('ar');
+
+        foreach ($rendered['groups'] as $label) {
+            $this->assertContains($label, $allowedGroups, 'Untranslated sidebar group: ' . $label);
+        }
+
+        foreach ($rendered['items'] as $label) {
+            $this->assertContains($label, $allowedItems, 'Untranslated sidebar item: ' . $label);
+        }
     }
 }

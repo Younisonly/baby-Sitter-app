@@ -18,6 +18,7 @@ class NotificationTemplateResource extends Resource
     protected static ?string $model = NotificationTemplate::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static ?int $navigationSort = 320;
     protected static ?string $recordTitleAttribute = 'title_en';
 
     public static function getNavigationGroup(): ?string

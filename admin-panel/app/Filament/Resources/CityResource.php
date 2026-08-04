@@ -18,6 +18,7 @@ class CityResource extends Resource
     protected static ?string $model = City::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
+    protected static ?int $navigationSort = 410;
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function getNavigationGroup(): ?string

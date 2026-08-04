@@ -18,6 +18,7 @@ class BookingResource extends Resource
     protected static ?string $model = Booking::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static ?int $navigationSort = 110;
     protected static ?string $recordTitleAttribute = 'booking_number';
 
     public static function getNavigationGroup(): ?string
