@@ -28,6 +28,7 @@ return [
             'FAQs' => 'FAQs',
             'Contact Settings' => 'Contact Settings',
             'Create Admin' => 'Create Admin',
+            'Platform Statistics' => 'Platform Statistics',
         ],
     ],
 
@@ -168,6 +169,7 @@ return [
             'Label' => 'Label',
             'Label (EN)' => 'Label (EN)',
             'Label (AR)' => 'Label (AR)',
+            'Value' => 'Value',
             'Description (EN)' => 'Description (EN)',
             'Description (AR)' => 'Description (AR)',
             'Icon' => 'Icon',
@@ -233,6 +235,9 @@ return [
             'Select language' => 'Select language',
             'Select country' => 'Select country',
             'Select policy' => 'Select policy',
+        ],
+        'helperTexts' => [
+            'Statistic Key' => 'Unique machine key used by the app (e.g. sitters, bookings, rating)',
         ],
     ],
 

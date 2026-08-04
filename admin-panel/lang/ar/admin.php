@@ -28,6 +28,7 @@ return [
             'FAQs' => 'الأسئلة الشائعة',
             'Contact Settings' => 'إعدادات التواصل',
             'Create Admin' => 'إنشاء مدير',
+            'Platform Statistics' => 'إحصائيات المنصة',
         ],
     ],
 
@@ -168,6 +169,7 @@ return [
             'Label' => 'التسمية',
             'Label (EN)' => 'التسمية (إنجليزي)',
             'Label (AR)' => 'التسمية (عربي)',
+            'Value' => 'القيمة',
             'Description (EN)' => 'الوصف (إنجليزي)',
             'Description (AR)' => 'الوصف (عربي)',
             'Icon' => 'الأيقونة',
@@ -233,6 +235,9 @@ return [
             'Select language' => 'اختر اللغة',
             'Select country' => 'اختر الدولة',
             'Select policy' => 'اختر السياسة',
+        ],
+        'helperTexts' => [
+            'Statistic Key' => 'مفتاح فريد يستخدمه التطبيق (مثل sitters أو bookings أو rating)',
         ],
     ],
 
