@@ -23,11 +23,14 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _channelIsEmail = true;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -36,7 +39,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     context.hideKeyboard();
 
     await ref.read(authProvider.notifier).forgotPassword(
-          _emailController.text.trim(),
+          email: _channelIsEmail ? _emailController.text.trim() : null,
+          phone: _channelIsEmail ? null : _phoneController.text.trim(),
         );
 
     if (!mounted) return;
@@ -77,7 +81,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Icon(
-                      Icons.lock_reset_rounded,
+                      _channelIsEmail
+                          ? Icons.lock_reset_rounded
+                          : Icons.sms_rounded,
                       size: 50.sp,
                       color: AppColors.primary,
                     ),
@@ -93,29 +99,75 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 SizedBox(height: AppSpacing.sm),
                 Text(
                   strings[AppLocalization.reset_password_instruction] ??
-                      'Enter your email and we\'ll send you a verification code to reset your password.',
+                      'Enter your email or phone number and we\'ll send you a verification code.',
                   style: AppTextStyles.bodyMedium(),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSpacing.xxl),
-                AppTextField(
-                  label: strings[AppLocalization.email],
-                  hint: 'example@email.com',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return strings[AppLocalization.email_required];
-                    }
-                    if (!value.isValidEmail) {
-                      return strings[AppLocalization.invalid_email];
-                    }
-                    return null;
+                SegmentedButton<bool>(
+                  segments: [
+                    ButtonSegment(
+                      value: true,
+                      icon: const Icon(Icons.email_rounded, size: 18),
+                      label: Text(
+                        strings[AppLocalization.channel_email] ?? 'Email',
+                      ),
+                    ),
+                    ButtonSegment(
+                      value: false,
+                      icon: const Icon(Icons.sms_rounded, size: 18),
+                      label: Text(
+                        strings[AppLocalization.channel_phone] ?? 'Phone',
+                      ),
+                    ),
+                  ],
+                  selected: {_channelIsEmail},
+                  onSelectionChanged: (selection) {
+                    setState(() => _channelIsEmail = selection.first);
+                    _formKey.currentState?.reset();
                   },
+                  showSelectedIcon: false,
+                  style: ButtonStyle(
+                    minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
+                    textStyle: WidgetStatePropertyAll(
+                      AppTextStyles.bodyMedium(weight: FontWeight.w600),
+                    ),
+                  ),
                 ),
+                SizedBox(height: AppSpacing.lg),
+                if (_channelIsEmail)
+                  AppTextField(
+                    label: strings[AppLocalization.email],
+                    hint: 'example@email.com',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return strings[AppLocalization.email_required];
+                      }
+                      if (!value.isValidEmail) {
+                        return strings[AppLocalization.invalid_email];
+                      }
+                      return null;
+                    },
+                  )
+                else
+                  AppTextField(
+                    label: strings[AppLocalization.phone_number],
+                    hint: '+967 7XXXXXXXX',
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return strings[AppLocalization.phone_required];
+                      }
+                      return null;
+                    },
+                  ),
                 SizedBox(height: AppSpacing.xxl),
                 AppButton(
                   text: strings[AppLocalization.send_code] ?? 'Send Code',

@@ -321,18 +321,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> forgotPassword(String email) async {
+  Future<void> forgotPassword({
+    String? email,
+    String? phone,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final data = await _authRepository.forgotPassword(email);
+      final data = await _authRepository.forgotPassword(
+        email: email,
+        phone: phone,
+      );
+      final channel = data['channel']?.toString() ?? (email != null ? 'email' : 'phone');
       state = state.copyWith(
         isLoading: false,
         otpToken: data['otpToken']?.toString(),
         otpMode: 'reset',
-        otpChannel: data['channel']?.toString() ?? 'email',
-        otpContact: email,
+        otpChannel: channel,
+        otpContact: email ?? phone ?? '',
         otpEmail: email,
-        otpPhone: null,
+        otpPhone: phone,
       );
     } catch (e) {
       state = state.copyWith(

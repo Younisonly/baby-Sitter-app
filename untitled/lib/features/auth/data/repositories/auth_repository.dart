@@ -46,9 +46,13 @@ class AuthRepository {
     return _extractData(response.data);
   }
 
-  Future<Map<String, dynamic>> forgotPassword(String email) async {
+  Future<Map<String, dynamic>> forgotPassword({
+    String? email,
+    String? phone,
+  }) async {
     final response = await DioClient.dio.post('/auth/forgot-password', data: {
-      'email': email,
+      if (email != null) 'email': email,
+      if (phone != null) 'phone': phone,
     });
     return _extractData(response.data);
   }
