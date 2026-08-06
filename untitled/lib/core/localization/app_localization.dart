@@ -247,6 +247,7 @@ class AppLocalization {
   static const String resend_in = 'resend_in';
   static const String resending = 'resending';
   static const String otp_sent_to = 'otp_sent_to';
+  static const String otp_paste_hint = 'otp_paste_hint';
   static const String didnt_get_code = 'didnt_get_code';
   static const String resend_via_email = 'resend_via_email';
   static const String resend_via_phone = 'resend_via_phone';
@@ -1754,6 +1755,7 @@ class AppLocalization {
     resend_in: 'Resend code in {seconds}s',
     resending: 'Resending...',
     otp_sent_to: 'We sent a 6-digit verification code to',
+    otp_paste_hint: 'You can paste the code from your messages',
     didnt_get_code: "Didn't get the code?",
     resend_via_email: 'Resend via Email',
     resend_via_phone: 'Resend via SMS',
@@ -3190,6 +3192,7 @@ class AppLocalization {
     resend_in: 'إعادة الإرسال خلال {seconds} ثانية',
     resending: 'جاري الإرسال...',
     otp_sent_to: 'أرسلنا رمز تحقق من 6 أرقام إلى',
+    otp_paste_hint: 'يمكنك لصق الرمز من رسائلك',
     didnt_get_code: 'لم يصلك الرمز؟',
     resend_via_email: 'إعادة الإرسال عبر البريد الإلكتروني',
     resend_via_phone: 'إعادة الإرسال عبر الرسائل النصية',

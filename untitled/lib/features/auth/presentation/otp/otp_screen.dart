@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -22,9 +23,8 @@ class OtpScreen extends ConsumerStatefulWidget {
 }
 
 class _OtpScreenState extends ConsumerState<OtpScreen> {
-  final List<TextEditingController> _controllers =
-      List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+  final _otpController = TextEditingController();
+  final _otpFocusNode = FocusNode();
   int _resendTimer = 60;
   bool _canResend = false;
   bool _isResending = false;
@@ -37,12 +37,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   @override
   void dispose() {
-    for (var c in _controllers) {
-      c.dispose();
-    }
-    for (var f in _focusNodes) {
-      f.dispose();
-    }
+    _otpController.dispose();
+    _otpFocusNode.dispose();
     super.dispose();
   }
 
@@ -59,7 +55,21 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     });
   }
 
-  String get _otp => _controllers.map((c) => c.text).join();
+  String get _otp => _otpController.text.replaceAll(RegExp(r'\D'), '');
+
+  void _onOtpChanged(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.length > 6) {
+      _otpController.text = digits.substring(0, 6);
+      _otpController.selection = TextSelection.collapsed(
+        offset: _otpController.text.length,
+      );
+    }
+    setState(() {});
+    if (_otp.length == 6) {
+      _verify();
+    }
+  }
 
   Future<void> _verify() async {
     if (_otp.length != 6) return;
@@ -183,49 +193,71 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 ),
               ),
               SizedBox(height: AppSpacing.xxl),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(6, (index) {
-                  return SizedBox(
-                    width: 48.w,
-                    child: TextField(
-                      controller: _controllers[index],
-                      focusNode: _focusNodes[index],
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      maxLength: 1,
-                      style: AppTextStyles.headlineMedium(),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        filled: true,
-                        fillColor: AppColors.surfaceLight,
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.md),
-                          borderSide: const BorderSide(
-                            color: AppColors.dividerLight,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.md),
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2,
-                          ),
+              GestureDetector(
+                onTap: () => _otpFocusNode.requestFocus(),
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(6, (index) {
+                    final digit = _otp.length > index
+                        ? _otp[index]
+                        : null;
+                    final isActive = index == _otp.length;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: 48.w,
+                      height: 56.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceLight,
+                        borderRadius:
+                            BorderRadius.circular(AppRadius.md),
+                        border: Border.all(
+                          width: isActive ? 2 : 1,
+                          color: isActive
+                              ? AppColors.primary
+                              : AppColors.dividerLight,
                         ),
                       ),
-                      onChanged: (value) {
-                        if (value.isNotEmpty && index < 5) {
-                          _focusNodes[index + 1].requestFocus();
-                        }
-                        if (_otp.length == 6) {
-                          _verify();
-                        }
-                      },
-                    ),
-                  );
-                }),
+                      child: Text(
+                        digit ?? '',
+                        style: AppTextStyles.headlineMedium(
+                          color: digit == null
+                              ? AppColors.dividerLight
+                              : context.textPrimaryColor,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: _otpController,
+                focusNode: _otpFocusNode,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(6),
+                ],
+                autofocus: true,
+                showCursor: false,
+                style: const TextStyle(fontSize: 1, color: Colors.transparent),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  counterText: '',
+                ),
+                onChanged: _onOtpChanged,
+              ),
+              Text(
+                strings[AppLocalization.otp_paste_hint] ??
+                    'You can paste the code from your messages',
+                style: AppTextStyles.bodySmall(
+                  color: context.textSecondaryColor,
+                ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: AppSpacing.xxl),
               AppButton(
