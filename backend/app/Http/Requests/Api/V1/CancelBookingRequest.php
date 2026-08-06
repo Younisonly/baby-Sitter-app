@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Api\V1;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
 
-class CancelBookingRequest extends FormRequest
+class CancelBookingRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {

@@ -19,7 +19,7 @@ class UploadController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'File uploaded successfully',
+            'message' => __('messages.file_uploaded_successfully'),
             'data' => [
                 'url' => Storage::url($path),
                 'filename' => $request->file('file')->getClientOriginalName(),
@@ -44,7 +44,7 @@ class UploadController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Image uploaded successfully',
+            'message' => __('messages.image_uploaded_successfully'),
             'data' => [
                 'url' => Storage::url($path),
                 'filename' => $filename,
@@ -76,7 +76,7 @@ class UploadController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Avatar updated successfully',
+            'message' => __('messages.avatar_updated'),
             'data' => [
                 'url' => $url,
             ],

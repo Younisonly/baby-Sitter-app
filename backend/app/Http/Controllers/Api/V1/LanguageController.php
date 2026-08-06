@@ -11,7 +11,7 @@ class LanguageController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'message' => 'Languages retrieved successfully',
+            'message' => __('messages.languages_retrieved'),
             'data' => Language::all(['id', 'name', 'name_ar']),
         ]);
     }

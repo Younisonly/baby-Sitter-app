@@ -14,7 +14,7 @@ class HeartbeatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'OK',
+            'message' => __('messages.ok'),
             'data' => [
                 'last_seen_at' => now()->toIso8601String(),
             ],

@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\V1\Admin\AdminFaqController;
 use App\Http\Controllers\Api\V1\Admin\AdminNotificationController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\NotificationSettingController;
+use App\Http\Controllers\Api\V1\PlatformStatisticController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\UserDeviceController;
 use App\Http\Controllers\Api\V1\SitterController;
 use App\Http\Controllers\Api\V1\SitterProfileController;
@@ -39,8 +41,9 @@ Route::get('/icons/categories', [AppIconController::class, 'categories'])->name(
 Route::get('/icons/category/{category}', [AppIconController::class, 'byCategory'])->name('icons.by-category');
 		Route::get('/faqs', [FaqController::class, 'index'])->name('faqs.index');
 		Route::get('/contact-settings', [ContactSettingController::class, 'index'])->name('contact-settings.index');
-		Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
-		Route::get('/languages', [LanguageController::class, 'index'])->name('languages.index');
+		             Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
+             Route::get('/languages', [LanguageController::class, 'index'])->name('languages.index');
+             Route::get('/platform-statistics', [PlatformStatisticController::class, 'index'])->name('platform-statistics.index');
 		Route::get('/special-skills', [SpecialSkillController::class, 'index'])->name('special-skills.index');
 		Route::get('/sitters', [SitterController::class, 'index'])->name('sitters.index');
 		Route::get('/sitters/{user}', [SitterController::class, 'show'])->whereNumber('user')->name('sitters.show');
@@ -52,6 +55,14 @@ Route::get('/icons/category/{category}', [AppIconController::class, 'byCategory'
 			->middleware('throttle:auth')->name('auth.verify-otp');
 		Route::post('/auth/login', [AuthController::class, 'login'])
 			->middleware('throttle:auth')->name('auth.login');
+		Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])
+			->middleware('throttle:auth')->name('auth.forgot-password');
+		Route::post('/auth/reset-password', [AuthController::class, 'resetPassword'])
+			->middleware('throttle:auth')->name('auth.reset-password');
+		Route::post('/auth/request-login-otp', [AuthController::class, 'requestLoginOtp'])
+			->middleware('throttle:auth')->name('auth.request-login-otp');
+		Route::post('/auth/verify-login-otp', [AuthController::class, 'verifyLoginOtp'])
+			->middleware('throttle:auth')->name('auth.verify-login-otp');
 		Route::post('/auth/social', [SocialAuthController::class, 'login'])
 			->middleware('throttle:auth')->name('auth.social');
 

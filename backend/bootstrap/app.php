@@ -5,6 +5,7 @@ use App\Http\Middleware\CheckSuspended;
 use App\Http\Middleware\ForceJsonMiddleware;
 use App\Http\Middleware\RemoveServerHeadersMiddleware;
 use App\Http\Middleware\SecurityHeadersMiddleware;
+use App\Http\Middleware\SetLocaleFromHeader;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -25,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Run locale detection globally first — before FormRequest validation fires
+        $middleware->prepend(SetLocaleFromHeader::class);
+
         $middleware->api(append: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             ForceJsonMiddleware::class,
@@ -65,18 +69,18 @@ return Application::configure(basePath: dirname(__DIR__))
             $message = match (true) {
                 $e instanceof ValidationException => null,
                 $e instanceof BookingConflictException => $e->getMessage(),
-                $status === 429 => 'Too many requests. Please try again later.',
-                $status === 404 => 'The requested resource was not found.',
-                $status === 401 => 'Please log in to continue.',
-                $status === 403 => 'You do not have permission to perform this action.',
-                default => 'Server error. Please try again later.',
+                $status === 429 => __('messages.too_many_requests'),
+                $status === 404 => __('messages.resource_not_found'),
+                $status === 401 => __('messages.unauthenticated'),
+                $status === 403 => __('messages.unauthorized_action'),
+                default => __('messages.server_error'),
             };
 
             $errors = $e instanceof ValidationException ? $e->errors() : null;
 
             if ($errors) {
                 $firstError = collect($errors)->flatten()->first();
-                $message = $firstError ?? 'Please check your input and try again.';
+                $message = $firstError ?? __('messages.check_input');
             }
 
             $response = [

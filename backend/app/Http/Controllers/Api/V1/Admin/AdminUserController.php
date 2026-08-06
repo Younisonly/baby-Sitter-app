@@ -67,7 +67,7 @@ class AdminUserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'User suspended.',
+            'message' => __('messages.user_suspended'),
         ]);
     }
 
@@ -81,7 +81,7 @@ class AdminUserController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'User reinstated.',
+            'message' => __('messages.user_reinstated'),
         ]);
     }
 }

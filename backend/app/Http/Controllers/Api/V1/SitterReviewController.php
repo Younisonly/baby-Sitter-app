@@ -15,7 +15,7 @@ class SitterReviewController extends Controller
     public function index(Request $request): JsonResponse
     {
         if ($request->user()->role !== 'babysitter') {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         $reviews = Booking::query()
@@ -42,11 +42,11 @@ class SitterReviewController extends Controller
     public function reply(Request $request, Booking $booking): JsonResponse
     {
         if ($request->user()->role !== 'babysitter' || $booking->sitter_id !== $request->user()->id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         if ($booking->rating === null || $booking->review === null) {
-            return response()->json(['status' => 'error', 'message' => 'This booking has no review to reply to.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.booking_no_review_reply')], 422);
         }
 
         $validated = $request->validate([
@@ -62,7 +62,7 @@ class SitterReviewController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Reply submitted successfully.',
+            'message' => __('messages.reply_submitted'),
             'data' => BookingResource::make($booking->fresh()->load('customer')),
         ]);
     }
@@ -70,12 +70,12 @@ class SitterReviewController extends Controller
     public function report(Request $request, Booking $booking): JsonResponse
     {
         if ($booking->rating === null) {
-            return response()->json(['status' => 'error', 'message' => 'No review to report.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.no_review_to_report')], 422);
         }
 
         $user = $request->user();
         if ($booking->customer_id !== $user->id && $booking->sitter_id !== $user->id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         $request->validate([
@@ -88,14 +88,14 @@ class SitterReviewController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Review reported. We will review it shortly.',
+            'message' => __('messages.review_reported'),
         ]);
     }
 
     public function markHelpful(Request $request, Booking $booking): JsonResponse
     {
         if ($booking->rating === null) {
-            return response()->json(['status' => 'error', 'message' => 'No review found.'], 404);
+            return response()->json(['status' => 'error', 'message' => __('messages.no_review_found')], 404);
         }
 
         $existing = DB::table('review_helpful')
@@ -104,7 +104,7 @@ class SitterReviewController extends Controller
             ->first();
 
         if ($existing) {
-            return response()->json(['status' => 'error', 'message' => 'Already marked as helpful.'], 409);
+            return response()->json(['status' => 'error', 'message' => __('messages.already_marked_helpful')], 409);
         }
 
         DB::table('review_helpful')->insert([
@@ -117,7 +117,7 @@ class SitterReviewController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Marked as helpful.',
+            'message' => __('messages.marked_helpful'),
             'data' => ['helpful_count' => $booking->fresh()->helpful_count],
         ]);
     }

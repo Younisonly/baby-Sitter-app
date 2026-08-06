@@ -45,7 +45,7 @@ class NotificationSettingController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Notification settings updated.',
+            'message' => __('messages.notification_settings_updated'),
             'data' => UserNotificationSettingResource::make($settings),
         ]);
     }

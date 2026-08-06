@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Api\V1;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreBookingRequest extends FormRequest
+class StoreBookingRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {

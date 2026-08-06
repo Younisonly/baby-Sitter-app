@@ -68,13 +68,13 @@ class NotificationController extends Controller
         if (!$success) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Notification not found.',
+                'message' => __('messages.notification_not_found'),
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Notification marked as read.',
+            'message' => __('messages.notification_marked_read'),
             'data' => NotificationResource::make($notification->fresh()),
         ]);
     }
@@ -85,7 +85,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => "{$count} notifications marked as read.",
+            'message' => __('messages.notifications_marked_read'),
             'data' => ['count' => $count],
         ]);
     }
@@ -98,7 +98,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => "{$count} notifications marked as read.",
+            'message' => __('messages.notifications_marked_read'),
             'data' => ['count' => $count],
         ]);
     }
@@ -110,13 +110,13 @@ class NotificationController extends Controller
         if (!$success) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Notification not found.',
+                'message' => __('messages.notification_not_found'),
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Notification deleted.',
+            'message' => __('messages.notification_deleted'),
         ]);
     }
 
@@ -128,7 +128,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => "{$count} notifications deleted.",
+            'message' => __('messages.notifications_deleted'),
             'data' => ['count' => $count],
         ]);
     }

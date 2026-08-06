@@ -13,7 +13,7 @@ final class ForceJsonMiddleware
         if (! $request->expectsJson() && ! $request->is('sanctum/csrf-cookie')) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Only JSON requests are accepted.',
+                'message' => __('messages.only_json_requests_accepted'),
             ], 406);
         }
 

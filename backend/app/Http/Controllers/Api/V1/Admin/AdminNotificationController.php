@@ -41,7 +41,7 @@ class AdminNotificationController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Template updated.',
+            'message' => __('messages.template_updated'),
             'data' => NotificationTemplateResource::make($template),
         ]);
     }

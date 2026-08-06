@@ -15,7 +15,7 @@ class CheckParentRole
         if (! $user || ! $user->canActAsParent()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'You need a parent profile to access this feature.',
+                'message' => __('messages.need_parent_profile'),
             ], 403);
         }
 

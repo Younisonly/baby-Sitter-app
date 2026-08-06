@@ -61,13 +61,27 @@ final class SitterSearchService
             });
         }
 
-        $this->applySorting($query, $filters['sort'] ?? 'featured');
+        $this->applySorting($query, $filters['sort'] ?? 'featured', $filters);
 
         return $query;
     }
 
-    private function applySorting(Builder $query, string $sort): void
+    private function applySorting(Builder $query, string $sort, array $filters = []): void
     {
+        if ($sort === 'nearest') {
+            $lat = $filters['lat'] ?? auth()->user()?->latitude;
+            $lng = $filters['lng'] ?? auth()->user()?->longitude;
+            if ($lat !== null && $lng !== null) {
+                $query->selectRaw(
+                    "users.*, ( 6371 * acos( cos( radians(?) ) * cos( radians( users.latitude ) ) * cos( radians( users.longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( users.latitude ) ) ) ) AS distance",
+                    [$lat, $lng, $lat]
+                )->orderBy('distance');
+                return;
+            }
+            // fallback if no location
+            $sort = 'featured';
+        }
+
         match ($sort) {
             'top_rated' => $query
                 ->join('babysitter_profiles', 'users.id', '=', 'babysitter_profiles.user_id')

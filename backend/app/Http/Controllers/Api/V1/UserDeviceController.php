@@ -30,7 +30,7 @@ class UserDeviceController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Device registered.',
+            'message' => __('messages.device_registered'),
             'data' => ['id' => $device->id],
         ], 201);
     }
@@ -45,7 +45,7 @@ class UserDeviceController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Device unregistered.',
+            'message' => __('messages.device_unregistered'),
         ]);
     }
 }

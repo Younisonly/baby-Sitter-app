@@ -38,7 +38,7 @@ class AdminFaqController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'FAQ created.',
+            'message' => __('messages.faq_created'),
             'data' => FaqResource::make($faq),
         ], 201);
     }
@@ -58,7 +58,7 @@ class AdminFaqController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'FAQ updated.',
+            'message' => __('messages.faq_updated'),
             'data' => FaqResource::make($faq),
         ]);
     }
@@ -69,7 +69,7 @@ class AdminFaqController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'FAQ deleted.',
+            'message' => __('messages.faq_deleted'),
         ]);
     }
 }

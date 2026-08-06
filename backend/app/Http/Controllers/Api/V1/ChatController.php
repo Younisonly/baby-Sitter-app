@@ -91,7 +91,7 @@ class ChatController extends Controller
         if ($otherUserId === $userId) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Cannot start conversation with yourself',
+                'message' => __('messages.cannot_start_conversation_with_self'),
             ], 422);
         }
 
@@ -322,7 +322,7 @@ class ChatController extends Controller
         if ($message->conversation_id !== $conversation->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Message does not belong to this conversation',
+                'message' => __('messages.message_not_in_conversation'),
             ], 422);
         }
 
@@ -350,7 +350,7 @@ class ChatController extends Controller
         if ($message->conversation_id !== $conversation->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Message does not belong to this conversation',
+                'message' => __('messages.message_not_in_conversation'),
             ], 422);
         }
 
@@ -363,13 +363,13 @@ class ChatController extends Controller
         if ($deleted === 0) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Reaction not found',
+                'message' => __('messages.reaction_not_found'),
             ], 404);
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Reaction removed',
+            'message' => __('messages.reaction_removed'),
         ], 200);
     }
 
@@ -406,7 +406,7 @@ class ChatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Marked as read',
+            'message' => __('messages.marked_read'),
         ]);
     }
 
@@ -417,7 +417,7 @@ class ChatController extends Controller
         if ($message->conversation_id !== $conversation->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Message does not belong to this conversation',
+                'message' => __('messages.message_not_in_conversation'),
             ], 422);
         }
 
@@ -425,7 +425,7 @@ class ChatController extends Controller
         if ($editedWithinMinutes > 30) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Messages can only be edited within 30 minutes of sending',
+                'message' => __('messages.message_edit_timeout'),
             ], 403);
         }
 
@@ -452,7 +452,7 @@ class ChatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Conversation archived',
+            'message' => __('messages.conversation_archived'),
         ]);
     }
 
@@ -464,7 +464,7 @@ class ChatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Conversation unarchived',
+            'message' => __('messages.conversation_unarchived'),
         ]);
     }
 
@@ -477,7 +477,7 @@ class ChatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Conversation deleted',
+            'message' => __('messages.conversation_deleted'),
         ]);
     }
 
@@ -488,14 +488,14 @@ class ChatController extends Controller
         if ($message->conversation_id !== $conversation->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Message does not belong to this conversation',
+                'message' => __('messages.message_not_in_conversation'),
             ], 422);
         }
 
         if ((int) $message->sender_id !== (int) request()->user()->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'You can only delete your own messages',
+                'message' => __('messages.can_only_delete_own_messages'),
             ], 403);
         }
 
@@ -503,7 +503,7 @@ class ChatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Message deleted',
+            'message' => __('messages.message_deleted'),
         ], 200);
     }
 

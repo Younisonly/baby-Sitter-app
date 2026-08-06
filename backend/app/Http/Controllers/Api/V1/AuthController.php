@@ -3,27 +3,35 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\RequestLoginOtpRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\VerifyLoginOtpRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Booking;
 use App\Models\ParentProfile;
 use App\Models\User;
+use App\Services\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(private OtpService $otpService)
+    {
+    }
+
     public function register(RegisterRequest $request): JsonResponse
     {
         $role = $request->input('role', 'customer');
+        $channel = $request->input('channel', 'email');
 
         $user = User::create([
             'name' => strip_tags($request->string('name')->toString()),
@@ -37,16 +45,10 @@ class AuthController extends Controller
 
         $this->ensureRoleProfile($user, $role);
 
-        $otpToken = Str::uuid()->toString();
-        $otp = app()->isProduction() ? (string) random_int(100000, 999999) : '111111';
-
         try {
-            Cache::put("otp:$otpToken", [
-                'user_id' => $user->id,
-                'otp' => Hash::make($otp),
-            ], now()->addMinutes(5));
+            $otp = $this->otpService->send($user->id, $channel);
         } catch (\Throwable $e) {
-            Log::error('Failed to cache OTP', [
+            Log::error('Failed to send registration OTP', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
@@ -55,17 +57,18 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to send verification code. Please try again.',
+                'message' => __('messages.failed_send_verification'),
             ], 500);
         }
 
         return response()->json([
             'status' => 'success',
             'message' => app()->isProduction()
-                ? 'Verification code sent.'
+                ? 'Verification code sent to your '.$channel.'.'
                 : 'Use OTP 111111 in local development.',
             'data' => [
-                'otpToken' => $otpToken,
+                'otpToken' => $otp['otp_token'],
+                'channel' => $otp['channel'],
                 'role' => $role,
             ],
         ], 201);
@@ -80,29 +83,142 @@ class AuthController extends Controller
         ]);
 
         try {
-            $cached = Cache::pull('otp:'.$validated['otp_token']);
-        } catch (\Throwable $e) {
-            Log::error('OTP cache pull failed', ['error' => $e->getMessage()]);
-
+            $verified = $this->otpService->verify($validated['otp_token'], $validated['otp']);
+        } catch (\RuntimeException $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Verification failed. Please try again.',
-            ], 500);
+                'message' => $e->getMessage(),
+            ], 422);
         }
 
-        if (! $cached || ! Hash::check($validated['otp'], $cached['otp'])) {
-            throw ValidationException::withMessages([
-                'otp' => ['Invalid or expired verification code.'],
-            ]);
-        }
-
-        $user = User::findOrFail($cached['user_id']);
+        $user = User::findOrFail($verified['user_id']);
         $user->forceFill([
-            'email_verified_at' => now(),
+            'email_verified_at' => $verified['channel'] === 'email'
+                ? now()
+                : $user->email_verified_at,
+            'phone_verified_at' => $verified['channel'] === 'phone'
+                ? now()
+                : $user->phone_verified_at,
             'verification_status' => 'verified',
         ])->save();
 
         return $this->tokenResponse($user, $validated['device_name'] ?? 'mobile_app');
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        $user = User::where('email', $request->input('email'))
+            ->orWhere('phone', $request->input('phone'))
+            ->firstOrFail();
+
+        $channel = $request->filled('email') ? 'email' : 'phone';
+
+        try {
+            $otp = $this->otpService->send($user->id, $channel);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.failed_send_verification'),
+            ], 500);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => app()->isProduction()
+                ? 'Verification code sent to your '.$channel.'.'
+                : 'Use OTP 111111 in local development.',
+            'data' => [
+                'otpToken' => $otp['otp_token'],
+                'channel' => $otp['channel'],
+            ],
+        ]);
+    }
+
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        try {
+            $verified = $this->otpService->verify($request->input('otp_token'), $request->input('otp'));
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        $user = User::findOrFail($verified['user_id']);
+        $user->update([
+            'password' => $request->string('password')->toString(),
+        ]);
+
+        $user->tokens()->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => __('messages.password_reset_successfully'),
+        ]);
+    }
+
+    public function requestLoginOtp(RequestLoginOtpRequest $request): JsonResponse
+    {
+        $user = User::where('email', $request->input('email'))
+            ->orWhere('phone', $request->input('phone'))
+            ->firstOrFail();
+
+        if ($user->is_suspended) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.account_suspended'),
+            ], 403);
+        }
+
+        $channel = $request->input('channel') ?? ($request->filled('email') ? 'email' : 'phone');
+
+        try {
+            $otp = $this->otpService->send($user->id, $channel);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.failed_send_verification'),
+            ], 500);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => app()->isProduction()
+                ? 'Verification code sent to your '.$channel.'.'
+                : 'Use OTP 111111 in local development.',
+            'data' => [
+                'otpToken' => $otp['otp_token'],
+                'channel' => $otp['channel'],
+            ],
+        ]);
+    }
+
+    public function verifyLoginOtp(VerifyLoginOtpRequest $request): JsonResponse
+    {
+        try {
+            $verified = $this->otpService->verify($request->input('otp_token'), $request->input('otp'));
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        $user = User::findOrFail($verified['user_id']);
+
+        if ($user->is_suspended) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.account_suspended'),
+            ], 403);
+        }
+
+        if ($verified['channel'] === 'phone') {
+            $user->forceFill(['phone_verified_at' => now()])->save();
+        }
+
+        return $this->tokenResponse($user, $request->input('device_name', 'mobile_app'));
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -123,7 +239,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Your account has been suspended. Please contact support.',
+                'message' => __('messages.account_suspended'),
             ], 403);
         }
 
@@ -141,7 +257,7 @@ class AuthController extends Controller
         if (! Hash::check($validated['password'], $user->password)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Password is incorrect.',
+                'message' => __('messages.password_incorrect'),
             ], 422);
         }
 
@@ -155,7 +271,7 @@ class AuthController extends Controller
         if ($activeBookings) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Cannot delete account while you have active bookings. Please cancel or complete them first.',
+                'message' => __('messages.cannot_delete_account_active_bookings'),
             ], 422);
         }
 
@@ -168,7 +284,7 @@ class AuthController extends Controller
             if ($hasPendingEarnings) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Cannot delete account while you have pending earnings. Please contact support to process your payouts before deleting your account.',
+                    'message' => __('messages.cannot_delete_account_pending_earnings'),
                 ], 422);
             }
         }
@@ -178,7 +294,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Account deleted.',
+            'message' => __('messages.account_deleted'),
         ]);
     }
 
@@ -222,7 +338,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Profile updated successfully.',
+            'message' => __('messages.profile_updated'),
             'data' => UserResource::make($user->refresh()->load('babysitterProfile', 'parentProfile')),
         ]);
     }
@@ -249,7 +365,7 @@ class AuthController extends Controller
         if ($user->canActAsSitter()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'You already have a sitter profile.',
+                'message' => __('messages.already_have_sitter_profile'),
             ], 422);
         }
 
@@ -275,7 +391,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Sitter profile created successfully.',
+            'message' => __('messages.sitter_profile_created'),
             'data' => [
                 'user' => UserResource::make($user->load('babysitterProfile', 'parentProfile')),
             ],
@@ -288,7 +404,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Logged out.',
+            'message' => __('messages.logged_out'),
         ]);
     }
 
@@ -319,7 +435,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to send verification code. Please try again.',
+                'message' => __('messages.failed_send_verification'),
             ], 500);
         }
 
@@ -350,14 +466,14 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Verification failed. Please try again.',
+                'message' => __('messages.verification_failed'),
             ], 500);
         }
 
         if (! $cached || $cached['user_id'] !== $user->id || ! Hash::check($validated['otp'], $cached['otp'])) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Invalid or expired verification code.',
+                'message' => __('messages.invalid_expired_verification_code'),
             ], 422);
         }
 
@@ -375,7 +491,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Profile updated successfully.',
+            'message' => __('messages.profile_updated'),
             'data' => UserResource::make($user->refresh()->load('babysitterProfile', 'parentProfile')),
         ]);
     }

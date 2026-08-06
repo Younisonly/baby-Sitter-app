@@ -15,7 +15,7 @@ class CheckSitterRole
         if (! $user || ! $user->canActAsSitter()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'You need a sitter profile to access this feature.',
+                'message' => __('messages.need_sitter_profile'),
             ], 403);
         }
 

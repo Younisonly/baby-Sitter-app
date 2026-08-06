@@ -50,10 +50,10 @@ class AdminSitterVerificationController extends Controller
     public function approve(User $user): JsonResponse
     {
         if ($user->role !== 'babysitter') {
-            return response()->json(['status' => 'error', 'message' => 'User is not a babysitter.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.user_not_babysitter')], 422);
         }
         if ($user->verification_status !== 'under_review') {
-            return response()->json(['status' => 'error', 'message' => 'Sitter is not in review status.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.sitter_not_in_review')], 422);
         }
 
         $user->forceFill([
@@ -67,17 +67,17 @@ class AdminSitterVerificationController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Sitter approved successfully.',
+            'message' => __('messages.sitter_approved'),
         ]);
     }
 
     public function reject(Request $request, User $user): JsonResponse
     {
         if ($user->role !== 'babysitter') {
-            return response()->json(['status' => 'error', 'message' => 'User is not a babysitter.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.user_not_babysitter')], 422);
         }
         if ($user->verification_status !== 'under_review') {
-            return response()->json(['status' => 'error', 'message' => 'Sitter is not in review status.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.sitter_not_in_review')], 422);
         }
 
         $validated = $request->validate([
@@ -91,7 +91,7 @@ class AdminSitterVerificationController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Sitter rejected.',
+            'message' => __('messages.sitter_rejected'),
         ]);
     }
 }

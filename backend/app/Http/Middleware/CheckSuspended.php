@@ -15,7 +15,7 @@ class CheckSuspended
         if ($user && $user->is_suspended) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Your account has been suspended. Please contact support for more information.',
+                'message' => __('messages.account_suspended_more_info'),
             ], 403);
         }
 

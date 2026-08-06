@@ -19,14 +19,14 @@ class SitterProfileController extends Controller
         if ($profile === null) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Babysitter profile not found.',
+                'message' => __('messages.sitter_profile_not_found'),
             ], 404);
         }
 
         if ($user->is_suspended) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Your account is suspended. You cannot edit your profile.',
+                'message' => __('messages.account_suspended_edit_profile'),
             ], 403);
         }
 
@@ -68,7 +68,7 @@ class SitterProfileController extends Controller
                 if ($activeBookings->isNotEmpty()) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Cannot clear availability while you have active bookings.',
+                        'message' => __('messages.cannot_clear_availability_active_bookings'),
                     ], 422);
                 }
             } else {
@@ -140,7 +140,7 @@ class SitterProfileController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Profile updated successfully.',
+            'message' => __('messages.profile_updated'),
             'data' => new UserResource($user->fresh()->load('babysitterProfile')),
         ]);
     }

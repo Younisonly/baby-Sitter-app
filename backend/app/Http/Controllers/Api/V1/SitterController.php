@@ -24,7 +24,9 @@ class SitterController extends Controller
         $validated = $request->validate([
             'category' => ['nullable', 'string', 'max:60'],
             'search' => ['nullable', 'string', 'max:80'],
-            'sort' => ['nullable', 'in:featured,top_rated,price_low,price_high,newest'],
+            'sort' => ['nullable', 'in:featured,top_rated,price_low,price_high,newest,nearest'],
+            'lat' => ['nullable', 'numeric'],
+            'lng' => ['nullable', 'numeric'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
             'min_price' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'max_price' => ['nullable', 'numeric', 'min:0', 'max:99999'],

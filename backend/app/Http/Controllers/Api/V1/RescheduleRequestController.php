@@ -49,11 +49,11 @@ class RescheduleRequestController extends Controller
         $canRequest = $user->id === $booking->customer_id || $user->id === $booking->sitter_id;
 
         if (!$canRequest) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         if (!in_array($booking->status, ['pending', 'confirmed'], true)) {
-            return response()->json(['status' => 'error', 'message' => 'Only pending or confirmed bookings can be rescheduled.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.only_pending_confirmed_rescheduled')], 422);
         }
 
         $existing = RescheduleRequest::query()
@@ -62,7 +62,7 @@ class RescheduleRequestController extends Controller
             ->exists();
 
         if ($existing) {
-            return response()->json(['status' => 'error', 'message' => 'There is already an active reschedule request for this booking.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.active_reschedule_request_exists')], 422);
         }
 
         $validated = $request->validate([
@@ -96,7 +96,7 @@ class RescheduleRequestController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Reschedule request submitted.',
+            'message' => __('messages.reschedule_request_submitted'),
             'data' => new RescheduleRequestResource($reschedule->load('requester:id,name,avatar')),
         ], 201);
     }
@@ -107,7 +107,7 @@ class RescheduleRequestController extends Controller
         $booking = $rescheduleRequest->booking;
 
         if ($user->id !== $booking->customer_id && $user->id !== $booking->sitter_id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         return response()->json([
@@ -122,15 +122,15 @@ class RescheduleRequestController extends Controller
         $booking = $rescheduleRequest->booking;
 
         if ($user->id !== $booking->customer_id && $user->id !== $booking->sitter_id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         if ($user->id === $rescheduleRequest->requested_by_id) {
-            return response()->json(['status' => 'error', 'message' => 'You cannot accept your own request.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.cannot_accept_own_request')], 422);
         }
 
         if (!$rescheduleRequest->isOpen()) {
-            return response()->json(['status' => 'error', 'message' => 'This request is no longer open.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.request_no_longer_open')], 422);
         }
 
         $effectiveDate = $rescheduleRequest->counter_date ?? $rescheduleRequest->proposed_date;
@@ -175,7 +175,7 @@ class RescheduleRequestController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Reschedule request accepted.',
+            'message' => __('messages.reschedule_request_accepted'),
             'data' => new RescheduleRequestResource($rescheduleRequest->fresh()->load('requester:id,name,avatar')),
         ]);
     }
@@ -186,15 +186,15 @@ class RescheduleRequestController extends Controller
         $booking = $rescheduleRequest->booking;
 
         if ($user->id !== $booking->customer_id && $user->id !== $booking->sitter_id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         if ($user->id === $rescheduleRequest->requested_by_id) {
-            return response()->json(['status' => 'error', 'message' => 'You cannot reject your own request.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.cannot_reject_own_request')], 422);
         }
 
         if (!$rescheduleRequest->isOpen()) {
-            return response()->json(['status' => 'error', 'message' => 'This request is no longer open.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.request_no_longer_open')], 422);
         }
 
         $validated = $request->validate([
@@ -208,7 +208,7 @@ class RescheduleRequestController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Reschedule request rejected.',
+            'message' => __('messages.reschedule_request_rejected'),
             'data' => new RescheduleRequestResource($rescheduleRequest->fresh()->load('requester:id,name,avatar')),
         ]);
     }
@@ -219,15 +219,15 @@ class RescheduleRequestController extends Controller
         $booking = $rescheduleRequest->booking;
 
         if ($user->id !== $booking->customer_id && $user->id !== $booking->sitter_id) {
-            return response()->json(['status' => 'error', 'message' => 'Unauthorized.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.unauthorized')], 403);
         }
 
         if ($user->id === $rescheduleRequest->requested_by_id) {
-            return response()->json(['status' => 'error', 'message' => 'You cannot counter your own request.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.cannot_counter_own_request')], 422);
         }
 
         if (!$rescheduleRequest->isOpen()) {
-            return response()->json(['status' => 'error', 'message' => 'This request is no longer open.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.request_no_longer_open')], 422);
         }
 
         $validated = $request->validate([
@@ -259,7 +259,7 @@ class RescheduleRequestController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Counter proposal submitted.',
+            'message' => __('messages.counter_proposal_submitted'),
             'data' => new RescheduleRequestResource($rescheduleRequest->fresh()->load('requester:id,name,avatar')),
         ]);
     }
@@ -269,18 +269,18 @@ class RescheduleRequestController extends Controller
         $user = request()->user();
 
         if ($user->id !== $rescheduleRequest->requested_by_id) {
-            return response()->json(['status' => 'error', 'message' => 'Only the requester can cancel.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.only_requester_can_cancel')], 403);
         }
 
         if (!$rescheduleRequest->isOpen()) {
-            return response()->json(['status' => 'error', 'message' => 'This request is no longer open.'], 422);
+            return response()->json(['status' => 'error', 'message' => __('messages.request_no_longer_open')], 422);
         }
 
         $rescheduleRequest->update(['status' => 'cancelled']);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Reschedule request cancelled.',
+            'message' => __('messages.reschedule_request_cancelled'),
         ]);
     }
 }

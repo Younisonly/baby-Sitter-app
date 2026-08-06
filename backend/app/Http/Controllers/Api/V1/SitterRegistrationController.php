@@ -37,7 +37,7 @@ class SitterRegistrationController extends Controller
         $user = $request->user();
 
         if ($user->is_suspended) {
-            return response()->json(['status' => 'error', 'message' => 'Your account is suspended. You cannot register as a babysitter.'], 403);
+            return response()->json(['status' => 'error', 'message' => __('messages.account_suspended_register')], 403);
         }
 
         if ($user->role === 'babysitter' && $user->registration_status !== 'none') {

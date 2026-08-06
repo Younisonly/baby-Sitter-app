@@ -21,7 +21,7 @@ class DashboardController extends Controller
         if ($request->user()->role !== 'babysitter') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Only babysitters can access the dashboard.',
+                'message' => __('messages.only_sitters_access_dashboard'),
             ], 403);
         }
 
@@ -88,7 +88,7 @@ class DashboardController extends Controller
         if ($request->user()->role !== 'babysitter') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Only babysitters can access the dashboard.',
+                'message' => __('messages.only_sitters_access_dashboard'),
             ], 403);
         }
 
@@ -111,14 +111,14 @@ class DashboardController extends Controller
         if ($request->user()->role !== 'babysitter') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Only babysitters can access the dashboard.',
+                'message' => __('messages.only_sitters_access_dashboard'),
             ], 403);
         }
 
         if ($request->user()->is_suspended) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Your account is suspended. You cannot change your availability.',
+                'message' => __('messages.account_suspended_availability'),
             ], 403);
         }
 
@@ -127,7 +127,7 @@ class DashboardController extends Controller
         if ($profile === null) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Babysitter profile not found.',
+                'message' => __('messages.sitter_profile_not_found'),
             ], 404);
         }
 
@@ -151,7 +151,7 @@ class DashboardController extends Controller
         if ($request->user()->role !== 'babysitter') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Only babysitters can access earnings data.',
+                'message' => __('messages.only_sitters_access_earnings'),
             ], 403);
         }
 
@@ -193,7 +193,7 @@ class DashboardController extends Controller
         if ($request->user()->role !== 'babysitter') {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Only babysitters can access analytics.',
+                'message' => __('messages.only_sitters_access_analytics'),
             ], 403);
         }
 

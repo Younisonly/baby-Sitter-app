@@ -8,6 +8,8 @@ use App\Models\Message;
 use App\Policies\BookingPolicy;
 use App\Policies\ChatPolicy;
 use App\Channels\AppDatabaseChannel;
+use App\Services\OtpService;
+use App\Services\SmsProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -19,11 +21,27 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->singleton(SmsProvider::class);
+        $this->app->singleton(OtpService::class);
     }
 
     public function boot(): void
     {
+        // Set app locale early from Accept-Language header so FormRequest
+        // validation messages are returned in the correct language.
+        $this->app->afterResolving(
+            \Illuminate\Foundation\Http\FormRequest::class,
+            function (\Illuminate\Foundation\Http\FormRequest $formRequest): void {
+                $locale = $formRequest->header('Accept-Language', 'en');
+                $locale = strtolower(trim(explode(',', $locale)[0]));
+                $locale = explode('-', $locale)[0];
+                if (!in_array($locale, ['en', 'ar'])) {
+                    $locale = 'en';
+                }
+                app()->setLocale($locale);
+            }
+        );
+
         Gate::policy(Booking::class, BookingPolicy::class);
         Gate::policy(Conversation::class, ChatPolicy::class);
         Gate::policy(Message::class, ChatPolicy::class);

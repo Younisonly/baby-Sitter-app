@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Api\V1;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\ApiFormRequest;
 
-class SendImageRequest extends FormRequest
+class SendImageRequest extends ApiFormRequest
 {
     public function authorize(): bool
     {
