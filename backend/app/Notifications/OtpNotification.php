@@ -24,6 +24,6 @@ class OtpNotification extends Notification implements ShouldQueue
     {
         app()->setLocale($notifiable->preferred_language ?? 'en');
 
-        return (new OtpMail($this->otp));
+        return (new OtpMail($this->otp))->to($notifiable->email);
     }
 }
