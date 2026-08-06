@@ -417,17 +417,12 @@ class AuthController extends Controller
             'phone' => ['nullable', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($user->id)],
         ]);
 
-        $otpToken = Str::uuid()->toString();
-        $otp = app()->isProduction() ? (string) random_int(100000, 999999) : '111111';
-
         try {
-            Cache::put("otp:$otpToken", [
-                'user_id' => $user->id,
-                'otp' => Hash::make($otp),
+            $otp = $this->otpService->send($user->id, 'email', [
                 'pending_email' => $validated['email'] ?? null,
                 'pending_phone' => $validated['phone'] ?? null,
-            ], now()->addMinutes(5));
-        } catch (\Throwable $e) {
+            ]);
+        } catch (\RuntimeException $e) {
             Log::error('Failed to cache update OTP', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
@@ -445,7 +440,7 @@ class AuthController extends Controller
                 ? 'Verification code sent to your email.'
                 : 'Use OTP 111111 in local development.',
             'data' => [
-                'otpToken' => $otpToken,
+                'otpToken' => $otp['otp_token'],
             ],
         ]);
     }
@@ -460,17 +455,20 @@ class AuthController extends Controller
         ]);
 
         try {
-            $cached = Cache::pull('otp:'.$validated['otp_token']);
-        } catch (\Throwable $e) {
-            Log::error('Update OTP cache pull failed', ['error' => $e->getMessage()]);
+            $verified = $this->otpService->verify($validated['otp_token'], $validated['otp']);
+        } catch (\RuntimeException $e) {
+            Log::error('Update OTP verification failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => __('messages.verification_failed'),
-            ], 500);
+                'message' => __('messages.invalid_expired_verification_code'),
+            ], 422);
         }
 
-        if (! $cached || $cached['user_id'] !== $user->id || ! Hash::check($validated['otp'], $cached['otp'])) {
+        if ((int) $verified['user_id'] !== $user->id) {
             return response()->json([
                 'status' => 'error',
                 'message' => __('messages.invalid_expired_verification_code'),
@@ -478,11 +476,11 @@ class AuthController extends Controller
         }
 
         $updates = [];
-        if (! empty($cached['pending_email'])) {
-            $updates['email'] = $cached['pending_email'];
+        if (! empty($verified['context']['pending_email'])) {
+            $updates['email'] = $verified['context']['pending_email'];
         }
-        if (! empty($cached['pending_phone'])) {
-            $updates['phone'] = $cached['pending_phone'];
+        if (! empty($verified['context']['pending_phone'])) {
+            $updates['phone'] = $verified['context']['pending_phone'];
         }
 
         if (! empty($updates)) {
