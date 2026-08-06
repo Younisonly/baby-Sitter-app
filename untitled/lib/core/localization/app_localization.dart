@@ -682,6 +682,9 @@ class AppLocalization {
   static const String verify_now = 'verify_now';
   static const String verify_account_prompt = 'verify_account_prompt';
   static const String not_now = 'not_now';
+  static const String choose_verify_channel = 'choose_verify_channel';
+  static const String send_code_to_email = 'send_code_to_email';
+  static const String send_code_to_phone = 'send_code_to_phone';
 
   // Validation error message keys
   static const String password_mixed_case = 'password_mixed_case';
@@ -2847,6 +2850,9 @@ class AppLocalization {
     verify_now: 'Verify Now',
     verify_account_prompt: 'Your account needs verification before you can log in. We will send you a verification code.',
     not_now: 'Not Now',
+    choose_verify_channel: 'How would you like to receive your code?',
+    send_code_to_email: 'Send code via Email',
+    send_code_to_phone: 'Send code via SMS',
 
     // Validation error messages (backend)
     password_mixed_case: 'Password must contain at least one uppercase and one lowercase letter.',
@@ -4264,6 +4270,9 @@ class AppLocalization {
     verify_now: 'تحقق الآن',
     verify_account_prompt: 'حسابك بحاجة إلى التحقق قبل تسجيل الدخول. سنرسل لك رمز تحقق.',
     not_now: 'ليس الآن',
+    choose_verify_channel: 'كيف تفضل استلام الرمز؟',
+    send_code_to_email: 'إرسال الرمز عبر البريد الإلكتروني',
+    send_code_to_phone: 'إرسال الرمز عبر الرسائل النصية',
 
     // Validation error messages (backend)
     password_mixed_case: 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير على الأقل.',

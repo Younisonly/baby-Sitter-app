@@ -144,75 +144,77 @@ class AppDialog {
           borderRadius: BorderRadius.circular(AppRadius.dialog),
         ),
         backgroundColor: ctx.cardColor,
-        content: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (effectiveIcon != null) ...[
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    gradient: isDestructive
-                        ? LinearGradient(colors: [
-                            AppColors.error,
-                            AppColors.error.withValues(alpha: 0.8),
-                          ], begin: Alignment.topLeft, end: Alignment.bottomRight)
-                        : const LinearGradient(
-                            colors: AppColors.primaryGradient,
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                    shape: BoxShape.circle,
+        content: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (effectiveIcon != null) ...[
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      gradient: isDestructive
+                          ? LinearGradient(colors: [
+                              AppColors.error,
+                              AppColors.error.withValues(alpha: 0.8),
+                            ], begin: Alignment.topLeft, end: Alignment.bottomRight)
+                          : const LinearGradient(
+                              colors: AppColors.primaryGradient,
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(effectiveIcon, size: 32, color: AppColors.white),
                   ),
-                  child: Icon(effectiveIcon, size: 32, color: AppColors.white),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+                Text(
+                  title,
+                  style: AppTextStyles.titleLarge(
+                    weight: FontWeight.bold,
+                    color: ctx.textPrimaryColor,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  content,
+                  style: AppTextStyles.bodyMedium(
+                    color: ctx.textSecondaryColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    text: confirmText,
+                    onPressed: () {
+                      final cb = onConfirm;
+                      Navigator.pop(ctx);
+                      Future.microtask(cb);
+                    },
+                    variant: isDestructive ? AppButtonVariant.danger : AppButtonVariant.filled,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    text: cancelText,
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      final cb = onCancel;
+                      if (cb != null) Future.microtask(cb);
+                    },
+                    variant: AppButtonVariant.outlined,
+                  ),
+                ),
               ],
-              Text(
-                title,
-                style: AppTextStyles.titleLarge(
-                  weight: FontWeight.bold,
-                  color: ctx.textPrimaryColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                content,
-                style: AppTextStyles.bodyMedium(
-                  color: ctx.textSecondaryColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  text: confirmText,
-                  onPressed: () {
-                    final cb = onConfirm;
-                    Navigator.pop(ctx);
-                    Future.microtask(cb);
-                  },
-                  variant: isDestructive ? AppButtonVariant.danger : AppButtonVariant.filled,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  text: cancelText,
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    final cb = onCancel;
-                    if (cb != null) Future.microtask(cb);
-                  },
-                  variant: AppButtonVariant.outlined,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

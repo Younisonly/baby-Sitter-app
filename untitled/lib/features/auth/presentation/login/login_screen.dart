@@ -90,27 +90,104 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (result?.containsKey('needsVerification') == true) {
       final strings = AppLocalization.get(ref.read(languageProvider).code);
-      AppDialog.show(
-        context: context,
-        title: strings[AppLocalization.account_unverified] ?? 'Account not verified',
-        content: strings[AppLocalization.verify_account_prompt] ??
-            'Your account needs verification before you can log in. We will send you a verification code.',
-        confirmText: strings[AppLocalization.verify_now] ?? 'Verify Now',
-        cancelText: strings[AppLocalization.not_now] ?? 'Not Now',
-        onConfirm: () async {
-          if (!mounted) return;
-          final authState = ref.read(authProvider);
-          await ref.read(authProvider.notifier).requestLoginOtp(
-            email: authState.otpEmail,
-            phone: authState.otpPhone,
-            channel: authState.otpChannel,
-          );
-          if (!mounted) return;
-          final otpContact = ref.read(authProvider).otpContact;
-          context.go('${AppRoutes.otp}?phone=${Uri.encodeComponent(otpContact)}');
-        },
-        onCancel: () {},
-      );
+      final hasEmail = authState.otpEmail?.isNotEmpty == true;
+      final hasPhone = authState.otpPhone?.isNotEmpty == true;
+
+      Future<void> sendAndGo(String channel, String? contact) async {
+        await ref.read(authProvider.notifier).requestLoginOtp(
+              email: channel == 'email' ? contact : null,
+              phone: channel == 'phone' ? contact : null,
+              channel: channel,
+            );
+        if (!mounted) return;
+        final otpContact = ref.read(authProvider).otpContact;
+        context.go('${AppRoutes.otp}?phone=${Uri.encodeComponent(otpContact)}');
+      }
+
+      final hasBoth = hasEmail && hasPhone;
+      if (hasBoth) {
+        await showAppModalSheet(
+          context,
+          child: Builder(
+            builder: (sheetContext) => Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.xl,
+                AppSpacing.xl,
+                AppSpacing.xl,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: AppColors.primaryGradient),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.verified_user_rounded, size: 32, color: AppColors.white),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    strings[AppLocalization.account_unverified] ?? 'Account not verified',
+                    style: AppTextStyles.titleLarge(weight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    strings[AppLocalization.choose_verify_channel] ??
+                        'How would you like to receive your code?',
+                    style: AppTextStyles.bodyMedium(
+                      color: context.textSecondaryColor,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  AppButton(
+                    text: strings[AppLocalization.send_code_to_email] ??
+                        'Send code via Email',
+                    prefixIcon: const Icon(Icons.email_rounded, size: 20),
+                    onPressed: () => sendAndGo('email', authState.otpEmail),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  AppButton(
+                    text: strings[AppLocalization.send_code_to_phone] ??
+                        'Send code via SMS',
+                    prefixIcon: const Icon(Icons.sms_rounded, size: 20),
+                    variant: AppButtonVariant.outlined,
+                    onPressed: () => sendAndGo('phone', authState.otpPhone),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    onPressed: () => Navigator.pop(sheetContext),
+                    child: Text(
+                      strings[AppLocalization.not_now] ?? 'Not Now',
+                      style: AppTextStyles.bodyMedium(
+                        color: context.textSecondaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      } else {
+        AppDialog.show(
+          context: context,
+          title: strings[AppLocalization.account_unverified] ?? 'Account not verified',
+          content: strings[AppLocalization.verify_account_prompt] ??
+              'Your account needs verification before you can log in. We will send you a verification code.',
+          confirmText: strings[AppLocalization.verify_now] ?? 'Verify Now',
+          cancelText: strings[AppLocalization.not_now] ?? 'Not Now',
+          onConfirm: () =>
+              sendAndGo(hasEmail ? 'email' : 'phone', hasEmail ? authState.otpEmail : authState.otpPhone),
+          onCancel: () {},
+        );
+      }
       return;
     }
 
