@@ -232,6 +232,8 @@ class AppLocalization {
   static const String email_or_phone = 'email_or_phone';
   static const String channel_email = 'channel_email';
   static const String channel_phone = 'channel_phone';
+  static const String enter_your_email = 'enter_your_email';
+  static const String enter_your_phone = 'enter_your_phone';
   static const String verification_method = 'verification_method';
   static const String code_sent_success = 'code_sent_success';
   static const String code_sent = 'code_sent';
@@ -1734,6 +1736,8 @@ class AppLocalization {
     email_or_phone: 'Email or Phone',
     channel_email: 'Email',
     channel_phone: 'Phone',
+    enter_your_email: 'Enter your email',
+    enter_your_phone: 'Enter your phone number',
     verification_method: 'Send verification code via',
     send_code: 'Send Code',
     new_password: 'Create New Password',
@@ -2081,7 +2085,7 @@ class AppLocalization {
     faq_title: 'FAQ',
     faq_empty: 'No FAQs yet',
     faq_empty_subtitle: 'Check back later for frequently asked questions.',
-    reset_password_instruction: 'Enter your email address and we\'ll send you a link to reset your password.',
+    reset_password_instruction: 'No problem. Choose how you want to receive your verification code and we\'ll take care of the rest.',
     skip: 'Skip',
     limited_offer: 'Limited Offer',
     off: 'OFF',
@@ -3170,6 +3174,8 @@ class AppLocalization {
     email_or_phone: 'البريد الإلكتروني أو الهاتف',
     channel_email: 'البريد الإلكتروني',
     channel_phone: 'الهاتف',
+    enter_your_email: 'أدخل بريدك الإلكتروني',
+    enter_your_phone: 'أدخل رقم هاتفك',
     verification_method: 'أرسل رمز التحقق عبر',
 
     code_sent_success: 'تم إرسال رمز التحقق',
@@ -3515,7 +3521,7 @@ class AppLocalization {
     faq_title: 'الأسئلة الشائعة',
     faq_empty: 'لا توجد أسئلة شائعة بعد',
     faq_empty_subtitle: 'تحقق لاحقاً للحصول على الأسئلة المتكررة.',
-    reset_password_instruction: 'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.',
+    reset_password_instruction: 'لا مشكلة. اختر الطريقة التي تريد استلام رمز التحقق بها وسنتكفل بالباقي.',
     skip: 'تخطي',
     limited_offer: 'عرض محدود',
     off: 'خصم',

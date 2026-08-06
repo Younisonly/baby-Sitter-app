@@ -121,43 +121,47 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSpacing.xxl),
-                SegmentedButton<bool>(
-                  segments: [
-                    ButtonSegment(
-                      value: true,
-                      icon: const Icon(Icons.email_rounded, size: 18),
-                      label: Text(
-                        strings[AppLocalization.channel_email] ?? 'Email',
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ChannelCard(
+                        selected: _channelIsEmail,
+                        icon: Icons.email_rounded,
+                        label: strings[AppLocalization.channel_email] ??
+                            'Email',
+                        subtitle: 'example@email.com',
+                        onTap: () => setState(() {
+                          _channelIsEmail = true;
+                          _formKey.currentState?.reset();
+                        }),
                       ),
                     ),
-                    ButtonSegment(
-                      value: false,
-                      icon: const Icon(Icons.sms_rounded, size: 18),
-                      label: Text(
-                        strings[AppLocalization.channel_phone] ?? 'Phone',
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: _ChannelCard(
+                        selected: !_channelIsEmail,
+                        icon: Icons.sms_rounded,
+                        label: strings[AppLocalization.channel_phone] ??
+                            'Phone',
+                        subtitle: '+966 5X XXX XXXX',
+                        onTap: () => setState(() {
+                          _channelIsEmail = false;
+                          _formKey.currentState?.reset();
+                        }),
                       ),
                     ),
                   ],
-                  selected: {_channelIsEmail},
-                  onSelectionChanged: (selection) {
-                    setState(() => _channelIsEmail = selection.first);
-                    _formKey.currentState?.reset();
-                  },
-                  showSelectedIcon: false,
-                  style: ButtonStyle(
-                    minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
-                    textStyle: WidgetStatePropertyAll(
-                      AppTextStyles.bodyMedium(weight: FontWeight.w600),
-                    ),
-                  ),
                 ),
                 SizedBox(height: AppSpacing.lg),
                 if (_channelIsEmail)
                   AppTextField(
-                    label: strings[AppLocalization.email],
+                    label:
+                        strings[AppLocalization.enter_your_email] ??
+                            'Enter your email',
                     hint: 'example@email.com',
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.done,
                     prefixIcon: const Icon(Icons.email_outlined),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -171,14 +175,21 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   )
                 else
                   AppTextField(
-                    label: strings[AppLocalization.phone_number],
-                    hint: '+967 7XXXXXXXX',
+                    label:
+                        strings[AppLocalization.enter_your_phone] ??
+                            'Enter your phone number',
+                    hint: '+966 5X XXX XXXX',
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.done,
                     prefixIcon: const Icon(Icons.phone_outlined),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return strings[AppLocalization.phone_required];
+                      }
+                      final digits = value.replaceAll(RegExp(r'\D'), '');
+                      if (!RegExp(r'^(9665\d{8}|05\d{8})$').hasMatch(digits)) {
+                        return strings[AppLocalization.phone_invalid_ksa];
                       }
                       return null;
                     },
@@ -191,6 +202,80 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChannelCard extends StatelessWidget {
+  const _ChannelCard({
+    required this.selected,
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final bool selected;
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected
+          ? AppColors.primaryUltraLight
+          : context.surfaceColor,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.lg,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(
+              width: 2,
+              color: selected
+                  ? AppColors.primary
+                  : context.borderColor,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 28.sp,
+                color: selected ? AppColors.primary : context.textSecondaryColor,
+              ),
+              SizedBox(height: AppSpacing.sm),
+              Text(
+                label,
+                style: AppTextStyles.bodyMedium(
+                  weight: FontWeight.w600,
+                  color: selected
+                      ? AppColors.primary
+                      : context.textPrimaryColor,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                subtitle,
+                style: AppTextStyles.bodySmall(
+                  color: context.textSecondaryColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ),
       ),

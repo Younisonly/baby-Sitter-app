@@ -152,6 +152,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     prefixIcon: const Icon(Icons.email_rounded, size: 20),
                     onPressed: () => sendAndGo('email', authState.otpEmail),
                   ),
+                  if (authState.otpEmail?.isNotEmpty == true) ...[
+                    SizedBox(height: 6),
+                    Text(
+                      authState.otpEmail!,
+                      style: AppTextStyles.bodySmall(
+                        color: context.textSecondaryColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.sm),
                   AppButton(
                     text: strings[AppLocalization.send_code_to_phone] ??
@@ -160,6 +170,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     variant: AppButtonVariant.outlined,
                     onPressed: () => sendAndGo('phone', authState.otpPhone),
                   ),
+                  if (authState.otpPhone?.isNotEmpty == true) ...[
+                    SizedBox(height: 6),
+                    Text(
+                      authState.otpPhone!,
+                      style: AppTextStyles.bodySmall(
+                        color: context.textSecondaryColor,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.sm),
                   TextButton(
                     onPressed: () => Navigator.pop(sheetContext),
