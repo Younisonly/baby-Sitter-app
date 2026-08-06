@@ -109,6 +109,7 @@ class AppLocalization {
   static const String phone_number = 'phone_number';
   static const String phone_required = 'phone_required';
   static const String phone_min_length = 'phone_min_length';
+  static const String phone_invalid_ksa = 'phone_invalid_ksa';
   static const String confirm_password = 'confirm_password';
   static const String password_too_short = 'password_too_short';
   static const String new_password = 'new_password';
@@ -233,6 +234,11 @@ class AppLocalization {
   static const String channel_phone = 'channel_phone';
   static const String verification_method = 'verification_method';
   static const String code_sent_success = 'code_sent_success';
+  static const String code_sent = 'code_sent';
+  static const String code_sent_to_email = 'code_sent_to_email';
+  static const String code_sent_to_phone = 'code_sent_to_phone';
+  static const String enter_code = 'enter_code';
+  static const String change_contact = 'change_contact';
   static const String code_resent = 'code_resent';
   static const String password_reset_success = 'password_reset_success';
   static const String code_expired = 'code_expired';
@@ -1608,6 +1614,7 @@ class AppLocalization {
     phone_number: 'Phone Number',
     phone_required: 'Phone number is required',
     phone_min_length: 'Enter a valid phone number',
+    phone_invalid_ksa: 'Enter a valid Saudi number, e.g. +9665XXXXXXXX',
     confirm_password: 'Confirm Password',
     password_too_short: 'Password must be at least 8 characters',
     password_mismatch: 'Passwords do not match',
@@ -1616,7 +1623,7 @@ class AppLocalization {
     name_too_short: 'Name must be at least 2 characters',
     name_hint: 'John Doe',
     email_hint: 'example@email.com',
-    phone_hint: '+962790000000',
+    phone_hint: '+9665XXXXXXXX',
     national_id: 'National ID',
     national_id_hint: 'e.g. 1234567890',
     national_id_required: 'National ID is required for sitter registration',
@@ -1732,6 +1739,11 @@ class AppLocalization {
     new_password: 'Create New Password',
     new_password_instruction: 'Choose a strong password for your account.',
     code_sent_success: 'Verification code sent',
+    code_sent: 'Code Sent',
+    code_sent_to_email: 'We sent your verification code to',
+    code_sent_to_phone: 'We sent your verification code via SMS to',
+    enter_code: 'Enter Code',
+    change_contact: 'Change',
     code_resent: 'Verification code resent',
     password_reset_success: 'Password reset successfully',
     code_expired: 'Verification code expired. Please try again.',
@@ -3035,6 +3047,7 @@ class AppLocalization {
     phone_number: 'رقم الهاتف',
     phone_required: 'رقم الهاتف مطلوب',
     phone_min_length: 'أدخل رقم هاتف صحيح',
+    phone_invalid_ksa: 'أدخل رقم سعودي صحيح، مثال: +9665XXXXXXXX',
     confirm_password: 'تأكيد كلمة المرور',
     password_too_short: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
     new_password: 'كلمة المرور الجديدة',
@@ -3046,7 +3059,7 @@ class AppLocalization {
     name_too_short: 'الاسم يجب أن يكون حرفين على الأقل',
     name_hint: 'محمد أحمد',
     email_hint: 'example@email.com',
-    phone_hint: '+962790000000',
+    phone_hint: '+9665XXXXXXXX',
     national_id: 'رقم الهوية',
     national_id_hint: 'مثال: 1234567890',
     national_id_required: 'رقم الهوية مطلوب لتسجيل الجليسة',
@@ -3160,6 +3173,11 @@ class AppLocalization {
     verification_method: 'أرسل رمز التحقق عبر',
 
     code_sent_success: 'تم إرسال رمز التحقق',
+    code_sent: 'تم إرسال الرمز',
+    code_sent_to_email: 'أرسلنا رمز التحقق إلى',
+    code_sent_to_phone: 'أرسلنا رمز التحقق عبر الرسائل النصية إلى',
+    enter_code: 'إدخال الرمز',
+    change_contact: 'تغيير',
     code_resent: 'تمت إعادة إرسال رمز التحقق',
     password_reset_success: 'تمت إعادة تعيين كلمة المرور بنجاح',
     code_expired: 'انتهت صلاحية رمز التحقق. يرجى المحاولة مرة أخرى.',

@@ -46,7 +46,22 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     if (!mounted) return;
     final authState = ref.read(authProvider);
     if (authState.otpToken != null && authState.otpMode == 'reset') {
-      context.push(AppRoutes.otp);
+      final strings = AppLocalization.get(ref.read(languageProvider).code);
+      final contact = authState.otpContact;
+      AppDialog.show(
+        context: context,
+        icon: authState.otpChannel == 'phone'
+            ? Icons.sms_rounded
+            : Icons.mark_email_read_rounded,
+        title: strings[AppLocalization.code_sent] ?? 'Code Sent',
+        content: authState.otpChannel == 'phone'
+            ? '${strings[AppLocalization.code_sent_to_phone] ?? 'We sent your verification code via SMS to'}\n$contact'
+            : '${strings[AppLocalization.code_sent_to_email] ?? 'We sent your verification code to'}\n$contact',
+        confirmText: strings[AppLocalization.enter_code] ?? 'Enter Code',
+        cancelText: strings[AppLocalization.change_contact] ?? 'Change',
+        onConfirm: () => context.push(AppRoutes.otp),
+        onCancel: () {},
+      );
     } else if (authState.error != null) {
       context.showErrorSnackBar(
         authState.error ?? 'Please check your connection and try again',

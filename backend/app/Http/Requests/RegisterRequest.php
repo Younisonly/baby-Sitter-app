@@ -17,7 +17,7 @@ class RegisterRequest extends ApiFormRequest
         return [
             'name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email:rfc,dns', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
+            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone', 'regex:/^(\+9665\d{8}|9665\d{8}|05\d{8})$/'],
             'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
             'role' => ['nullable', 'string', 'in:customer,babysitter'],
             'national_id' => [
@@ -36,6 +36,7 @@ class RegisterRequest extends ApiFormRequest
     {
         return [
             'national_id.required_if' => 'National ID is required for babysitter registration.',
+            'phone.regex' => 'Enter a valid Saudi number, e.g. +9665XXXXXXXX.',
         ];
     }
 }

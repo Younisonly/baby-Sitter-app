@@ -204,21 +204,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: AppSpacing.lg),
                       AppTextField(
                         label: strings[AppLocalization.phone_number] ?? 'Phone Number',
-                        hint: strings[AppLocalization.phone_hint] ?? '+962790000000',
+                        hint: strings[AppLocalization.phone_hint] ?? '+9665XXXXXXXX',
                         controller: _phoneController,
                         focusNode: _phoneFocus,
                         keyboardType: TextInputType.phone,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.phone_outlined),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[0-9+]'),
+                          ),
+                          LengthLimitingTextInputFormatter(13),
+                        ],
                         onSubmitted: (_) => _passwordFocus.requestFocus(),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return strings[AppLocalization.phone_required] ??
                                 'Phone number is required';
                           }
-                          if (value.length < 10) {
-                            return strings[AppLocalization.phone_min_length] ??
-                                'Enter a valid phone number';
+                          final digits = value.replaceAll(RegExp(r'[^0-9+]'), '');
+                          final isKsa = RegExp(r'^(\+9665\d{8}|9665\d{8}|05\d{8})$')
+                              .hasMatch(digits);
+                          if (!isKsa) {
+                            return strings[AppLocalization.phone_invalid_ksa] ??
+                                'Enter a valid Saudi number, e.g. +9665XXXXXXXX';
                           }
                           return null;
                         },
