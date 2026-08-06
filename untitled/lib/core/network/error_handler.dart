@@ -126,6 +126,11 @@ class ErrorHandler {
         normalized.contains('account suspended')) {
       return AppLocalization.account_suspended;
     }
+    if (normalized.contains('not verified yet') ||
+        normalized.contains('not verified') ||
+        normalized.contains('account is not verified')) {
+      return AppLocalization.account_unverified;
+    }
     if (normalized.contains('too many') || normalized.contains('throttl')) {
       return AppLocalization.too_many_requests;
     }

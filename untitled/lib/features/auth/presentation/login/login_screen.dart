@@ -88,6 +88,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     final authState = ref.read(authProvider);
 
+    if (result?.containsKey('needsVerification') == true) {
+      final strings = AppLocalization.get(ref.read(languageProvider).code);
+      AppDialog.show(
+        context: context,
+        title: strings[AppLocalization.account_unverified] ?? 'Account not verified',
+        content: strings[AppLocalization.verify_account_prompt] ??
+            'Your account needs verification before you can log in. We will send you a verification code.',
+        confirmText: strings[AppLocalization.verify_now] ?? 'Verify Now',
+        cancelText: strings[AppLocalization.not_now] ?? 'Not Now',
+        onConfirm: () async {
+          if (!mounted) return;
+          final authState = ref.read(authProvider);
+          await ref.read(authProvider.notifier).requestLoginOtp(
+            email: authState.otpEmail,
+            phone: authState.otpPhone,
+            channel: authState.otpChannel,
+          );
+          if (!mounted) return;
+          final otpContact = ref.read(authProvider).otpContact;
+          context.go('${AppRoutes.otp}?phone=${Uri.encodeComponent(otpContact)}');
+        },
+        onCancel: () {},
+      );
+      return;
+    }
+
     if (authState.isAuthenticated) {
       if (result?.containsKey('roleUnavailable') == true) {
         _showRoleUnavailableDialog(result!['roleUnavailable'] as String);
@@ -442,7 +468,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             style: AppTextStyles.bodyMedium(color: context.textMutedColor),
           ),
           TextButton(
-            onPressed: () => context.go(_isSitter ? '${AppRoutes.register}?role=sitter' : AppRoutes.register),
+            onPressed: () => context.push(_isSitter ? '${AppRoutes.register}?role=sitter' : AppRoutes.register),
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,

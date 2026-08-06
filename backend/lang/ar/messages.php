@@ -80,6 +80,7 @@ return [
     'need_parent_profile' => 'تحتاج إلى حساب ولي أمر للوصول إلى هذه الميزة.',
     'need_sitter_profile' => 'تحتاج إلى حساب جليسة للوصول إلى هذه الميزة.',
     'account_suspended' => 'تم تعليق حسابك. يرجى التواصل مع الدعم.',
+    'account_unverified' => 'لم يتم التحقق من حسابك بعد. يرجى التحقق من حسابك للمتابعة.',
     'account_suspended_more_info' => 'تم تعليق حسابك. يرجى التواصل مع الدعم لمزيد من المعلومات.',
     'account_suspended_availability' => 'حسابك معلق. لا يمكنك تغيير أوقات توفرك.',
     'account_suspended_edit_profile' => 'حسابك معلق. لا يمكنك تعديل ملفك الشخصي.',

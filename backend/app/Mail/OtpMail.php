@@ -13,9 +13,12 @@ class OtpMail extends Mailable
 
     public string $otp;
 
-    public function __construct(string $otp)
+    public string $userName;
+
+    public function __construct(string $otp, string $userName = '')
     {
         $this->otp = $otp;
+        $this->userName = $userName ?: __('auth.otp_greeting_default');
     }
 
     public function build(): Mailable

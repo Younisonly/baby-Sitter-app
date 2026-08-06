@@ -216,6 +216,8 @@ class AuthController extends Controller
 
         if ($verified['channel'] === 'phone') {
             $user->forceFill(['phone_verified_at' => now()])->save();
+        } else {
+            $user->forceFill(['email_verified_at' => now()])->save();
         }
 
         return $this->tokenResponse($user, $request->input('device_name', 'mobile_app'));
@@ -240,6 +242,20 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => __('messages.account_suspended'),
+            ], 403);
+        }
+
+        if (! $user->email_verified_at && ! $user->phone_verified_at) {
+            Log::warning('Unverified user login attempt', ['user_id' => $user->id, 'email' => $email, 'ip' => $request->ip()]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => __('messages.account_unverified'),
+                'data' => [
+                    'needsVerification' => true,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                ],
             ], 403);
         }
 

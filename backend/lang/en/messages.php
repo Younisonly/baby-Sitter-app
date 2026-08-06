@@ -80,6 +80,7 @@ return [
     'need_parent_profile' => 'need_parent_profile',
     'need_sitter_profile' => 'need_sitter_profile',
     'account_suspended' => 'account_suspended',
+    'account_unverified' => 'Your account is not verified yet. Please verify your account to continue.',
     'account_suspended_more_info' => 'account_suspended_more_info',
     'account_suspended_availability' => 'account_suspended_availability',
     'account_suspended_edit_profile' => 'account_suspended_edit_profile',

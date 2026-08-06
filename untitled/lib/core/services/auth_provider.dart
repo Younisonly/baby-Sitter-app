@@ -33,6 +33,8 @@ class AuthState with _$AuthState {
     @Default(null) String? otpMode,
     @Default('email') String otpChannel,
     @Default('') String otpContact,
+    @Default(null) String? otpEmail,
+    @Default(null) String? otpPhone,
     @Default(null) String? otpResendKey,
     @Default(null) String? pendingOtp,
   }) = _AuthState;
@@ -253,9 +255,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       return null;
     } catch (e) {
+      final appException = ErrorHandler.handle(e);
+      if (appException.statusCode == 403 &&
+          appException.data is Map &&
+          (appException.data as Map)['needsVerification'] == true) {
+        final data = appException.data as Map;
+        final unverifiedEmail = data['email']?.toString();
+        final unverifiedPhone = data['phone']?.toString();
+        state = state.copyWith(
+          isLoading: false,
+          error: appException.message,
+          otpToken: null,
+          otpMode: 'login',
+          otpChannel: unverifiedEmail?.isNotEmpty == true ? 'email' : 'phone',
+          otpContact: unverifiedEmail?.isNotEmpty == true
+              ? unverifiedEmail!
+              : unverifiedPhone ?? '',
+          otpEmail: unverifiedEmail,
+          otpPhone: unverifiedPhone,
+        );
+        return {'needsVerification': true};
+      }
       state = state.copyWith(
         isLoading: false,
-        error: ErrorHandler.handle(e).message,
+        error: appException.message,
       );
       return null;
     }
@@ -287,6 +310,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpMode: 'register',
         otpChannel: data['channel']?.toString() ?? channel,
         otpContact: channel == 'phone' ? phone : email,
+        otpEmail: email,
+        otpPhone: phone,
       );
     } catch (e) {
       state = state.copyWith(
@@ -306,6 +331,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpMode: 'reset',
         otpChannel: data['channel']?.toString() ?? 'email',
         otpContact: email,
+        otpEmail: email,
+        otpPhone: null,
       );
     } catch (e) {
       state = state.copyWith(
@@ -333,6 +360,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpMode: 'login',
         otpChannel: data['channel']?.toString() ?? channel ?? 'email',
         otpContact: email ?? phone ?? '',
+        otpEmail: email,
+        otpPhone: phone,
       );
     } catch (e) {
       state = state.copyWith(
@@ -342,24 +371,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> resendOtp() async {
+  Future<void> resendOtp({String? channel}) async {
     if (state.isLoading || state.otpToken == null) return;
+    final targetChannel = channel ?? state.otpChannel;
+    final email = targetChannel == 'email'
+        ? (state.otpEmail ?? (state.otpContact.contains('@')
+            ? state.otpContact
+            : null))
+        : null;
+    final phone = targetChannel == 'phone'
+        ? (state.otpPhone ?? (state.otpContact.contains('@')
+            ? null
+            : state.otpContact))
+        : null;
+
+    if (email == null && phone == null) {
+      state = state.copyWith(
+        error: ErrorHandler.handle(
+          const FormatException('missing_otp_contact'),
+        ).message,
+      );
+      return;
+    }
+
     state = state.copyWith(isLoading: true, error: null);
     try {
       final data = await _authRepository.requestLoginOtp(
-        email: state.otpChannel == 'email' && state.otpContact.contains('@')
-            ? state.otpContact
-            : null,
-        phone: state.otpChannel == 'phone' ||
-                !state.otpContact.contains('@')
-            ? state.otpContact
-            : null,
-        channel: state.otpChannel,
+        email: email,
+        phone: phone,
+        channel: targetChannel,
       );
       state = state.copyWith(
         isLoading: false,
         otpToken: data['otpToken']?.toString(),
-        otpChannel: data['channel']?.toString() ?? state.otpChannel,
+        otpChannel: data['channel']?.toString() ?? targetChannel,
+        otpContact: targetChannel == 'email' ? (email ?? state.otpContact) : (phone ?? state.otpContact),
       );
     } catch (e) {
       state = state.copyWith(

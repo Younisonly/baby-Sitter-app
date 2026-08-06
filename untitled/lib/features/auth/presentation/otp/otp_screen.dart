@@ -114,12 +114,32 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   Widget build(BuildContext context) {
     final strings = AppLocalization.get(ref.watch(languageProvider).code);
     final authState = ref.watch(authProvider);
+    final isEmail = authState.otpChannel == 'email';
     final contact = authState.otpContact.isNotEmpty
         ? authState.otpContact
         : widget.phone;
 
-    return Scaffold(
-      appBar: AppAppBar(title: strings[AppLocalization.otp_verification]),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.welcome);
+        }
+      },
+      child: Scaffold(
+        appBar: AppAppBar(
+          title: strings[AppLocalization.otp_verification],
+          onBackPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.welcome);
+            }
+          },
+        ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),
@@ -135,7 +155,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Icon(
-                  Icons.security_rounded,
+                  isEmail ? Icons.mark_email_read_rounded : Icons.sms_rounded,
                   size: 40.sp,
                   color: AppColors.primary,
                 ),
@@ -143,13 +163,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               SizedBox(height: AppSpacing.xl),
               Text(
                 strings[AppLocalization.otp_verification] ??
-                    'OTP Verification',
+                    'Verification Code',
                 style: AppTextStyles.displaySmall(),
               ),
               SizedBox(height: AppSpacing.sm),
               Text(
-                strings[AppLocalization.enter_otp] ??
-                    'Enter the verification code',
+                strings[AppLocalization.otp_sent_to] ??
+                    'We sent a 6-digit verification code to',
                 style: AppTextStyles.bodyMedium(),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -220,6 +240,35 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       .replaceFirst('{seconds}', '$_resendTimer'),
                   style: AppTextStyles.bodyMedium(),
                 )
+              else if (_canResendViaOtherChannel())
+                Column(
+                  children: [
+                    Text(
+                      strings[AppLocalization.didnt_get_code] ??
+                          "Didn't get the code?",
+                      style: AppTextStyles.bodyMedium(),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: AppSpacing.sm,
+                      children: [
+                        _resendChannelButton(
+                          label: strings[AppLocalization.resend_via_email] ??
+                              'Resend via Email',
+                          icon: Icons.email_outlined,
+                          channel: 'email',
+                        ),
+                        _resendChannelButton(
+                          label: strings[AppLocalization.resend_via_phone] ??
+                              'Resend via SMS',
+                          icon: Icons.sms_outlined,
+                          channel: 'phone',
+                        ),
+                      ],
+                    ),
+                  ],
+                )
               else
                 TextButton(
                   onPressed: _isResending ? null : _resend,
@@ -235,6 +284,58 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         ),
         ),
       ),
+      ),
     );
+  }
+
+  bool _canResendViaOtherChannel() {
+    final authState = ref.read(authProvider);
+    return (authState.otpEmail?.isNotEmpty ?? false) &&
+        (authState.otpPhone?.isNotEmpty ?? false);
+  }
+
+  Widget _resendChannelButton({
+    required String label,
+    required IconData icon,
+    required String channel,
+  }) {
+    return OutlinedButton.icon(
+      onPressed: _isResending
+          ? null
+          : () => _resendToChannel(channel),
+      icon: Icon(icon, size: 18.sp),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _resendToChannel(String channel) async {
+    if (_isResending) return;
+    setState(() {
+      _isResending = true;
+      _canResend = false;
+      _resendTimer = 60;
+    });
+    await ref.read(authProvider.notifier).resendOtp(channel: channel);
+    if (!mounted) return;
+    setState(() => _isResending = false);
+    _startResendTimer();
+    final authState = ref.read(authProvider);
+    final strings = AppLocalization.get(ref.read(languageProvider).code);
+    if (authState.error != null) {
+      context.showErrorSnackBar(authState.error ?? 'Please check your connection and try again');
+    } else {
+      context.showSuccessSnackBar(
+        strings[AppLocalization.code_resent] ?? 'Verification code resent',
+      );
+    }
   }
 }

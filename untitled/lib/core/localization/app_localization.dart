@@ -238,6 +238,10 @@ class AppLocalization {
   static const String code_expired = 'code_expired';
   static const String resend_in = 'resend_in';
   static const String resending = 'resending';
+  static const String otp_sent_to = 'otp_sent_to';
+  static const String didnt_get_code = 'didnt_get_code';
+  static const String resend_via_email = 'resend_via_email';
+  static const String resend_via_phone = 'resend_via_phone';
   static const String login_required = 'login_required';
   static const String continue_as_visitor = 'continue_as_visitor';
   static const String continue_browsing = 'continue_browsing';
@@ -674,6 +678,10 @@ class AppLocalization {
   static const String stars = 'stars';
   static const String invalid_credentials = 'invalid_credentials';
   static const String account_suspended = 'account_suspended';
+  static const String account_unverified = 'account_unverified';
+  static const String verify_now = 'verify_now';
+  static const String verify_account_prompt = 'verify_account_prompt';
+  static const String not_now = 'not_now';
 
   // Validation error message keys
   static const String password_mixed_case = 'password_mixed_case';
@@ -1707,7 +1715,7 @@ class AppLocalization {
     rating: 'Rating',
     followers: 'Followers',
     reset_password: 'Reset Password',
-    otp_verification: 'OTP Verification',
+    otp_verification: 'Verification Code',
     enter_otp: 'Enter the verification code sent to your phone',
     verify: 'Verify',
     resend_code: 'Resend Code',
@@ -1726,6 +1734,10 @@ class AppLocalization {
     code_expired: 'Verification code expired. Please try again.',
     resend_in: 'Resend code in {seconds}s',
     resending: 'Resending...',
+    otp_sent_to: 'We sent a 6-digit verification code to',
+    didnt_get_code: "Didn't get the code?",
+    resend_via_email: 'Resend via Email',
+    resend_via_phone: 'Resend via SMS',
     book_now: 'Book Now',
     login_required: 'Login Required',
     continue_browsing: 'Continue Browsing',
@@ -2831,6 +2843,10 @@ class AppLocalization {
     stars: 'stars',
     invalid_credentials: 'The provided credentials are incorrect.',
     account_suspended: 'Your account has been suspended. Please contact support.',
+    account_unverified: 'Your account is not verified yet. Please verify to continue.',
+    verify_now: 'Verify Now',
+    verify_account_prompt: 'Your account needs verification before you can log in. We will send you a verification code.',
+    not_now: 'Not Now',
 
     // Validation error messages (backend)
     password_mixed_case: 'Password must contain at least one uppercase and one lowercase letter.',
@@ -3126,7 +3142,7 @@ class AppLocalization {
     rating: 'التقييم',
     followers: 'المتابعون',
     reset_password: 'إعادة تعيين كلمة المرور',
-    otp_verification: 'التحقق من رمز OTP',
+    otp_verification: 'رمز التحقق',
     enter_otp: 'أدخل رمز التحقق المرسل إلى هاتفك',
     verify: 'تحقق',
     resend_code: 'إعادة إرسال الرمز',
@@ -3143,6 +3159,10 @@ class AppLocalization {
     code_expired: 'انتهت صلاحية رمز التحقق. يرجى المحاولة مرة أخرى.',
     resend_in: 'إعادة الإرسال خلال {seconds} ثانية',
     resending: 'جاري الإرسال...',
+    otp_sent_to: 'أرسلنا رمز تحقق من 6 أرقام إلى',
+    didnt_get_code: 'لم يصلك الرمز؟',
+    resend_via_email: 'إعادة الإرسال عبر البريد الإلكتروني',
+    resend_via_phone: 'إعادة الإرسال عبر الرسائل النصية',
     book_now: 'احجز الآن',
     login_required: 'تسجيل الدخول مطلوب',
     continue_browsing: 'متابعة التصفح',
@@ -4240,6 +4260,10 @@ class AppLocalization {
     general_error: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
     invalid_credentials: 'بيانات التسجيل غير صحيحة.',
     account_suspended: 'تم تعليق حسابك. يرجى التواصل مع الدعم.',
+    account_unverified: 'لم يتم التحقق من حسابك بعد. يرجى التحقق للمتابعة.',
+    verify_now: 'تحقق الآن',
+    verify_account_prompt: 'حسابك بحاجة إلى التحقق قبل تسجيل الدخول. سنرسل لك رمز تحقق.',
+    not_now: 'ليس الآن',
 
     // Validation error messages (backend)
     password_mixed_case: 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير على الأقل.',

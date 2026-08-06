@@ -109,6 +109,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!mounted) return;
     final authState = ref.read(authProvider);
     if (authState.otpToken != null) {
+      final strings = AppLocalization.get(ref.read(languageProvider).code);
+      final sentTo = authState.otpChannel == 'phone'
+          ? _phoneController.text.trim()
+          : _emailController.text.trim();
+      context.showSuccessSnackBar(
+        '${strings[AppLocalization.code_sent_success] ?? 'Verification code sent'} '
+        '($sentTo)',
+      );
       context.pushReplacement(
         '${AppRoutes.otp}?phone=${_phoneController.text}',
       );
@@ -380,7 +388,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               IconButton(
                 icon: const Icon(Icons.arrow_back_rounded,
                     color: AppColors.white),
-                onPressed: () => context.canPop() ? context.pop() : context.go(AppRoutes.parentHome),
+                onPressed: () => context.canPop() ? context.pop() : context.go(AppRoutes.welcome),
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.white.withValues(alpha: 0.15),
                 ),
