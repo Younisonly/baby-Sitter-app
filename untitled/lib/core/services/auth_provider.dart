@@ -381,16 +381,58 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> resendOtp({String? channel}) async {
     if (state.isLoading) return false;
     final targetChannel = channel ?? state.otpChannel;
+    final currentToken = state.otpToken;
+
+    if (currentToken != null && currentToken.isNotEmpty) {
+      state = state.copyWith(isLoading: true, error: null);
+      try {
+        final data = await _authRepository.resendOtp(
+          currentToken,
+          channel: targetChannel,
+        );
+        final newToken = data['otpToken']?.toString();
+        if (newToken == null || newToken.isEmpty) {
+          state = state.copyWith(
+            isLoading: false,
+            error: ErrorHandler.handle(
+              const FormatException('missing_otp_token'),
+            ).message,
+          );
+          return false;
+        }
+        state = state.copyWith(
+          isLoading: false,
+          otpToken: newToken,
+          otpChannel: data['channel']?.toString() ?? targetChannel,
+          otpContact: state.otpContact,
+        );
+        return true;
+      } catch (e) {
+        state = state.copyWith(
+          isLoading: false,
+          error: ErrorHandler.handle(e).message,
+        );
+        return false;
+      }
+    }
+
     final email = targetChannel == 'email'
-        ? (state.otpEmail ?? (state.otpContact.contains('@')
-            ? state.otpContact
-            : null))
+        ? (state.otpEmail ??
+            (state.otpContact.contains('@') ? state.otpContact : null))
         : null;
     final phone = targetChannel == 'phone'
-        ? (state.otpPhone ?? (state.otpContact.contains('@')
-            ? null
-            : state.otpContact))
+        ? (state.otpPhone ??
+            (state.otpContact.contains('@') ? null : state.otpContact))
         : null;
+
+    if (state.otpMode == 'register') {
+      state = state.copyWith(
+        error: ErrorHandler.handle(
+          const FormatException('missing_otp_token'),
+        ).message,
+      );
+      return false;
+    }
 
     if (email == null && phone == null) {
       state = state.copyWith(

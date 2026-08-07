@@ -63,6 +63,8 @@ Route::get('/icons/category/{category}', [AppIconController::class, 'byCategory'
 			->middleware('throttle:auth')->name('auth.request-login-otp');
 		Route::post('/auth/verify-login-otp', [AuthController::class, 'verifyLoginOtp'])
 			->middleware('throttle:auth')->name('auth.verify-login-otp');
+		Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp'])
+			->middleware('throttle:auth')->name('auth.resend-otp');
 		Route::post('/auth/social', [SocialAuthController::class, 'login'])
 			->middleware('throttle:auth')->name('auth.social');
 

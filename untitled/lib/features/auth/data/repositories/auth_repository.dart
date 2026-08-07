@@ -83,6 +83,17 @@ class AuthRepository {
     return _extractData(response.data);
   }
 
+  Future<Map<String, dynamic>> resendOtp(
+    String otpToken, {
+    String? channel,
+  }) async {
+    final response = await DioClient.dio.post('/auth/resend-otp', data: {
+      'otp_token': otpToken,
+      if (channel != null) 'channel': channel,
+    });
+    return _extractData(response.data);
+  }
+
   Future<Map<String, dynamic>> verifyLoginOtp(
     String otp,
     String? otpToken,

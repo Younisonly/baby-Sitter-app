@@ -33,27 +33,22 @@ class AuthController extends Controller
         $role = $request->input('role', 'customer');
         $channel = $request->input('channel', 'email');
 
-        $user = User::create([
-            'name' => strip_tags($request->string('name')->toString()),
-            'email' => $request->string('email')->lower()->toString(),
-            'phone' => $request->input('phone'),
-            'password' => $request->string('password')->toString(),
-            'role' => $role,
-            'national_id' => $request->input('national_id'),
-            'preferred_language' => $request->input('preferred_language', 'en'),
-        ]);
-
-        $this->ensureRoleProfile($user, $role);
-
         try {
-            $otp = $this->otpService->send($user->id, $channel);
+            $otp = $this->otpService->send(0, $channel, [
+                'registration' => true,
+                'name' => strip_tags($request->string('name')->toString()),
+                'email' => $request->string('email')->lower()->toString(),
+                'phone' => $request->input('phone'),
+                'password_hash' => Hash::make($request->string('password')->toString()),
+                'role' => $role,
+                'national_id' => $request->input('national_id'),
+                'preferred_language' => $request->input('preferred_language', 'en'),
+            ]);
         } catch (\Throwable $e) {
-            Log::error('Failed to send registration OTP', [
-                'user_id' => $user->id,
+            Log::error('Failed to prepare registration OTP', [
+                'email' => $request->string('email')->lower()->toString(),
                 'error' => $e->getMessage(),
             ]);
-
-            $user->delete();
 
             return response()->json([
                 'status' => 'error',
@@ -91,18 +86,90 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $user = User::findOrFail($verified['user_id']);
-        $user->forceFill([
-            'email_verified_at' => $verified['channel'] === 'email'
-                ? now()
-                : $user->email_verified_at,
-            'phone_verified_at' => $verified['channel'] === 'phone'
-                ? now()
-                : $user->phone_verified_at,
-            'verification_status' => 'verified',
-        ])->save();
+        $context = $verified['context'];
+
+        // verify-otp is registration-only: a user is created only after the
+        // code is verified. Login and password-reset have their own endpoints.
+        if (empty($context['registration']) || empty($context['email'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or expired verification code.',
+            ], 422);
+        }
+
+        $email = $context['email'];
+        $phone = $context['phone'] ?? null;
+
+        if (User::where('email', $email)->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The email address is already registered.',
+            ], 422);
+        }
+
+        if ($phone && User::where('phone', $phone)->exists()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The phone number is already registered.',
+            ], 422);
+        }
+
+        try {
+            $user = User::create([
+                'name' => $context['name'],
+                'email' => $email,
+                'phone' => $phone,
+                'password' => $context['password_hash'],
+                'role' => $context['role'] ?? 'customer',
+                'national_id' => $context['national_id'] ?? null,
+                'preferred_language' => $context['preferred_language'] ?? 'en',
+                'email_verified_at' => $verified['channel'] === 'email' ? now() : null,
+                'phone_verified_at' => $verified['channel'] === 'phone' ? now() : null,
+                'verification_status' => 'verified',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to create verified user', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'The email address is already registered.',
+            ], 422);
+        }
+
+        $this->ensureRoleProfile($user, $user->role);
 
         return $this->tokenResponse($user, $validated['device_name'] ?? 'mobile_app');
+    }
+
+    public function resendOtp(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'otp_token' => ['required', 'string'],
+            'channel' => ['nullable', 'string', 'in:email,phone'],
+        ]);
+
+        try {
+            $otp = $this->otpService->resendByToken($validated['otp_token'], $validated['channel'] ?? null);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => app()->isProduction()
+                ? 'Verification code sent to your '.$otp['channel'].'.'
+                : 'Use OTP 111111 in local development.',
+            'data' => [
+                'otpToken' => $otp['otp_token'],
+                'channel' => $otp['channel'],
+            ],
+        ]);
     }
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse

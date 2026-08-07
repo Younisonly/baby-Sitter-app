@@ -245,6 +245,7 @@ class AppLocalization {
   static const String otp_session_expired = 'otp_session_expired';
   static const String password_reset_success = 'password_reset_success';
   static const String code_expired = 'code_expired';
+  static const String failed_send_verification = 'failed_send_verification';
   static const String resend_in = 'resend_in';
   static const String resending = 'resending';
   static const String otp_sent_to = 'otp_sent_to';
@@ -1754,6 +1755,7 @@ class AppLocalization {
     otp_session_expired: 'Your session expired. We sent you a new code — please use it',
     password_reset_success: 'Password reset successfully',
     code_expired: 'Verification code expired. Please try again.',
+    failed_send_verification: 'Failed to send the verification code. Please try again.',
     resend_in: 'Resend code in {seconds}s',
     resending: 'Resending...',
     otp_sent_to: 'We sent a 6-digit verification code to',
@@ -3192,6 +3194,7 @@ class AppLocalization {
     otp_session_expired: 'انتهت صلاحية الجلسة، أرسلنا لك رمزاً جديداً — يرجى استخدامه',
     password_reset_success: 'تمت إعادة تعيين كلمة المرور بنجاح',
     code_expired: 'انتهت صلاحية رمز التحقق. يرجى المحاولة مرة أخرى.',
+    failed_send_verification: 'تعذر إرسال رمز التحقق. يرجى المحاولة مرة أخرى.',
     resend_in: 'إعادة الإرسال خلال {seconds} ثانية',
     resending: 'جاري الإرسال...',
     otp_sent_to: 'أرسلنا رمز تحقق من 6 أرقام إلى',

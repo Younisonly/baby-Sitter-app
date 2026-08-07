@@ -22,10 +22,10 @@ use Illuminate\Support\Facades\Log;
  */
 class SmsProvider
 {
-    public function send(int|string $userId, string $otp): void
+    public function send(int|string $userId, string $otp, ?string $phone = null): void
     {
         $driver = config('services.sms.driver', 'log');
-        $phone = $this->resolvePhone($userId);
+        $phone = $phone ?: $this->resolvePhone($userId);
 
         try {
             match ($driver) {

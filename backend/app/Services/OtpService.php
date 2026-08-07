@@ -54,9 +54,40 @@ class OtpService
             throw new \RuntimeException('Failed to prepare verification code.');
         }
 
-        $this->deliver($userId, $channel, $otp);
+        $this->deliver($userId, $channel, $otp, $context);
 
         return ['otp_token' => $otpToken, 'channel' => $channel];
+    }
+
+    /**
+     * Best-effort resend for an existing (un-consumed) OTP token. Reads the
+     * cached context, regenerates the code under a fresh token, and re-delivers
+     * it. Works for flows where no user row exists yet (registration).
+     *
+     * @return array{otp_token: string, channel: string}
+     */
+    public function resendByToken(string $otpToken, ?string $channel = null): array
+    {
+        try {
+            $cached = Cache::get("otp:$otpToken");
+        } catch (\Throwable $e) {
+            Log::error('OTP resend cache read failed', ['error' => $e->getMessage()]);
+
+            throw new \RuntimeException('Your session expired. Please request a new code.');
+        }
+
+        if (! $cached || ! isset($cached['user_id'])) {
+            throw new \RuntimeException('Your session expired. Please request a new code.');
+        }
+
+        $context = $cached;
+        unset($context['otp'], $context['channel']);
+
+        return $this->send(
+            (int) $cached['user_id'],
+            $channel ?? ($cached['channel'] ?? 'email'),
+            $context,
+        );
     }
 
     /**
@@ -85,21 +116,32 @@ class OtpService
         ];
     }
 
-    private function deliver(string $userId, string $channel, string $otp): void
+    private function deliver(string $userId, string $channel, string $otp, array $context = []): void
     {
         try {
             if ($channel === 'phone') {
-                $this->smsProvider->send($userId, $otp);
+                $phone = $context['phone'] ?? null;
+                $this->smsProvider->send($userId, $otp, $phone);
 
                 return;
             }
 
             $user = \App\Models\User::find($userId);
-            if (! $user) {
+            $email = $user?->email ?? $context['email'] ?? null;
+
+            if (! $email) {
                 return;
             }
 
-            $user->notify(new OtpNotification($otp));
+            $userName = $user?->name ?? trim((string) ($context['name'] ?? ''));
+
+            if ($user) {
+                $user->notify(new OtpNotification($otp));
+
+                return;
+            }
+
+            \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\OtpMail($otp, $userName));
         } catch (\Throwable $e) {
             Log::error('OTP delivery failed', [
                 'user_id' => $userId,

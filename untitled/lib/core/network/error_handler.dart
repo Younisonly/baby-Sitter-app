@@ -134,6 +134,14 @@ class ErrorHandler {
     if (normalized.contains('too many') || normalized.contains('throttl')) {
       return AppLocalization.too_many_requests;
     }
+    if (normalized.contains('invalid or expired') ||
+        normalized.contains('verification code expired') ||
+        normalized.contains('invalid or expired verification code')) {
+      return AppLocalization.code_expired;
+    }
+    if (normalized.contains('session expired')) {
+      return AppLocalization.otp_session_expired;
+    }
 
     // Business logic
     if (normalized.contains('cannot book yourself')) {

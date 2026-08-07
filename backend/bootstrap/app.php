@@ -56,6 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             $status = match (true) {
+                $e instanceof ValidationException => 422,
                 $e instanceof TooManyRequestsHttpException => 429,
                 $e instanceof NotFoundHttpException,
                 $e instanceof ModelNotFoundException => 404,
