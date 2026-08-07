@@ -111,15 +111,15 @@ class DatabaseSeeder extends Seeder
 
         // Pre-generated avatar references (3 sitters with images, 2 without)
         $avatars = [
-            'https://i.pravatar.cc/400?u=sara@example.com',
-            'https://i.pravatar.cc/400?u=noura@example.com',
-            'https://i.pravatar.cc/400?u=reem@example.com',
+            'https://randomuser.me/api/portraits/women/65.jpg',
+            'https://randomuser.me/api/portraits/women/44.jpg',
+            'https://randomuser.me/api/portraits/women/68.jpg',
             null,
             null,
         ];
 
         // Remove legacy sitters replaced by the KSA sitters below
-        User::whereIn('email', ['emma@example.com', 'olivia@example.com', 'sophia@example.com'])
+        User::whereIn('email', ['emma@example.com', 'olivia@example.com', 'sophia@example.com', 'reem@example.com'])
             ->where('role', 'babysitter')
             ->get()
             ->each(fn (User $u) => $u->delete());
@@ -160,8 +160,8 @@ class DatabaseSeeder extends Seeder
                 'languages' => ['Arabic', 'English'],
             ],
             [
-                'name' => 'ريم العتيبي',
-                'email' => 'reem@example.com',
+                'name' => 'أمل العتيبي',
+                'email' => 'amal@example.com',
                 'phone' => '+966550000103',
                 'location' => 'الدمام، حي الشاطئ',
                 'latitude' => 26.4468,
