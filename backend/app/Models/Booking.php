@@ -131,6 +131,11 @@ class Booking extends Model
         return $this->belongsTo(Booking::class, 'rescheduled_from_id');
     }
 
+    public function bookingGroup(): BelongsTo
+    {
+        return $this->belongsTo(BookingGroup::class, 'booking_group_id', 'id');
+    }
+
     public function statusHistories(): HasMany
     {
         return $this->hasMany(BookingStatusHistory::class);

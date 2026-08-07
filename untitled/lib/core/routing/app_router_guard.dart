@@ -41,6 +41,11 @@ class AppRouterGuard {
       return AppRoutes.parentHome;
     }
 
+    // Legacy /home route - redirect to the shell that fits auth state
+    if (path == AppRoutes.home) {
+      return _hasToken ? AppRoutes.parentHome : AppRoutes.visitorHome;
+    }
+
     return null;
   }
 
