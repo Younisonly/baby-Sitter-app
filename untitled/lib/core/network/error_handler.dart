@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:babysitter/core/localization/app_localization.dart';
 
 class AppException implements Exception {
@@ -21,8 +20,6 @@ class AppException implements Exception {
 
 class ErrorHandler {
   static AppException handle(dynamic error) {
-    // DEBUG-TEMP: print every error entering the handler
-    debugPrint('[DEBUG-ERROR] handle() type=${error.runtimeType} error=$error');
     if (error is DioException) {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
@@ -78,18 +75,12 @@ class ErrorHandler {
     final data = response.data;
     String message;
 
-    // DEBUG-TEMP: print raw error details for OTP flow debugging
-    debugPrint('[DEBUG-ERROR] status=$statusCode rawData=$data');
-
     if (data is Map && data['message'] != null) {
       final rawMessage = data['message'].toString();
       message = _mapBackendMessage(rawMessage);
     } else {
       message = _getDefaultMessage(statusCode);
     }
-
-    // DEBUG-TEMP: print final mapped message
-    debugPrint('[DEBUG-ERROR] mappedMessage=$message');
 
     if (statusCode == 422 && data is Map && data['errors'] is Map) {
       final errors = data['errors'] as Map;
