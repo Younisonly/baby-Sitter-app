@@ -6,6 +6,7 @@ import 'package:babysitter/core/constants/app_spacing.dart';
 import 'package:babysitter/core/constants/app_text_styles.dart';
 import 'package:babysitter/core/extensions/extensions.dart';
 import 'package:babysitter/core/localization/app_localization.dart';
+import 'package:babysitter/core/network/error_handler.dart';
 import 'package:babysitter/core/services/theme_language_providers.dart';
 import 'package:babysitter/features/booking/data/reschedule_request_provider.dart';
 import 'package:babysitter/shared/models/reschedule_request_model.dart';
@@ -140,7 +141,10 @@ class _RescheduleRequestsScreenState extends ConsumerState<RescheduleRequestsScr
       if (success) {
         context.showSuccessSnackBar(strings[AppLocalization.reschedule_request_accepted] ?? 'Reschedule request accepted');
       } else {
-        context.showErrorSnackBar(strings[AppLocalization.something_went_wrong] ?? 'Something went wrong');
+        context.showErrorSnackBar(
+          ref.read(rescheduleRequestsProvider).error ??
+              (strings[AppLocalization.request_failed] ?? 'Request failed'),
+        );
       }
     }
   }
@@ -178,7 +182,10 @@ class _RescheduleRequestsScreenState extends ConsumerState<RescheduleRequestsScr
       if (success) {
         context.showSuccessSnackBar(strings[AppLocalization.reschedule_request_rejected] ?? 'Reschedule request rejected');
       } else {
-        context.showErrorSnackBar(strings[AppLocalization.something_went_wrong] ?? 'Something went wrong');
+        context.showErrorSnackBar(
+          ref.read(rescheduleRequestsProvider).error ??
+              (strings[AppLocalization.request_failed] ?? 'Request failed'),
+        );
       }
     }
   }
@@ -286,9 +293,11 @@ class _RescheduleRequestsScreenState extends ConsumerState<RescheduleRequestsScr
                                 Navigator.pop(context);
                                 context.showSuccessSnackBar(strings[AppLocalization.counter_submitted] ?? 'Counter proposal submitted');
                               }
-                            } catch (_) {
+                            } catch (e) {
                               if (ctx.mounted) {
-                                context.showErrorSnackBar(strings[AppLocalization.something_went_wrong] ?? 'Something went wrong');
+                                context.showErrorSnackBar(
+                                  ErrorHandler.handle(e).message,
+                                );
                               }
                             }
                           },

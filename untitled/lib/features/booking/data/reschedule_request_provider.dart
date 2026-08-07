@@ -109,7 +109,8 @@ class RescheduleRequestsNotifier extends StateNotifier<RescheduleRequestsState> 
       final updated = await _repository.acceptRescheduleRequest(id);
       _replaceRequest(updated);
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: ErrorHandler.handle(e).message);
       return false;
     }
   }
@@ -119,7 +120,8 @@ class RescheduleRequestsNotifier extends StateNotifier<RescheduleRequestsState> 
       final updated = await _repository.rejectRescheduleRequest(id, reason: reason);
       _replaceRequest(updated);
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: ErrorHandler.handle(e).message);
       return false;
     }
   }
@@ -153,7 +155,8 @@ class RescheduleRequestsNotifier extends StateNotifier<RescheduleRequestsState> 
         requests: state.requests.where((r) => r.id != id).toList(),
       );
       return true;
-    } catch (_) {
+    } catch (e) {
+      state = state.copyWith(error: ErrorHandler.handle(e).message);
       return false;
     }
   }

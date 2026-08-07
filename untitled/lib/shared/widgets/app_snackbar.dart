@@ -171,7 +171,7 @@ class AppSnackbar {
   }
 
   static void error(BuildContext context, String message, {String? title, String? actionLabel, VoidCallback? onAction}) {
-    show(context, message: message, type: SnackbarType.error, title: title ?? AppLocalization.something_went_wrong, actionLabel: actionLabel, onAction: onAction);
+    show(context, message: message, type: SnackbarType.error, title: title, actionLabel: actionLabel, onAction: onAction);
   }
 
   static void warning(BuildContext context, String message, {String? title, String? actionLabel, VoidCallback? onAction}) {

@@ -391,6 +391,7 @@ class AppLocalization {
   static const String submitting = 'submitting';
   static const String pending = 'pending';
   static const String something_went_wrong = 'something_went_wrong';
+  static const String request_failed = 'request_failed';
   static const String failed_load_dashboard = 'failed_load_dashboard';
   static const String end_time_after_start = 'end_time_after_start';
   static const String set_start_end_time = 'set_start_end_time';
@@ -1880,6 +1881,7 @@ class AppLocalization {
     submitting: 'Submitting...',
     pending: 'Pending',
     something_went_wrong: 'Something went wrong',
+    request_failed: 'Request failed',
     failed_load_dashboard: 'Failed to load dashboard',
     end_time_after_start: 'End time must be after start time',
     set_start_end_time: 'Set start and end time first',
@@ -3319,6 +3321,7 @@ class AppLocalization {
     submitting: 'جاري الإرسال...',
     pending: 'قيد الانتظار',
     something_went_wrong: 'حدث خطأ ما',
+    request_failed: 'فشل الطلب',
     failed_load_dashboard: 'فشل تحميل لوحة التحكم',
     end_time_after_start: 'يجب أن يكون وقت النهاية بعد وقت البداية',
     set_start_end_time: 'حدد وقت البداية والنهاية أولاً',
