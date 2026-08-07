@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinput/pinput.dart';
 import 'package:babysitter/core/constants/app_colors.dart';
 import 'package:babysitter/core/constants/app_radius.dart';
 import 'package:babysitter/core/constants/app_spacing.dart';
@@ -28,6 +29,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   int _resendTimer = 60;
   bool _canResend = false;
   bool _isResending = false;
+  bool _autoVerifyFired = false;
 
   @override
   void initState() {
@@ -66,7 +68,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       );
     }
     setState(() {});
-    if (_otp.length == 6) {
+    if (_otp.length == 6 && !_autoVerifyFired) {
+      _autoVerifyFired = true;
       _verify();
     }
   }
@@ -85,6 +88,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       return;
     }
 
+    if (authState.otpToken == null) {
+      context.showErrorSnackBar(
+        'Session expired, please request a new code',
+      );
+      return;
+    }
+
     await ref.read(authProvider.notifier).verifyOtp(_otp);
 
     if (!mounted) return;
@@ -94,6 +104,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         if (mounted) context.go(AppRoutes.home);
       });
     } else if (state.error != null) {
+      _autoVerifyFired = false;
       context.showErrorSnackBar(state.error ?? 'Please check your connection and try again');
     }
   }
@@ -193,64 +204,70 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 ),
               ),
               SizedBox(height: AppSpacing.xxl),
-              GestureDetector(
-                onTap: () => _otpFocusNode.requestFocus(),
-                behavior: HitTestBehavior.opaque,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) {
-                    final digit = _otp.length > index
-                        ? _otp[index]
-                        : null;
-                    final isActive = index == _otp.length;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      width: 48.w,
-                      height: 56.h,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceLight,
-                        borderRadius:
-                            BorderRadius.circular(AppRadius.md),
-                        border: Border.all(
-                          width: isActive ? 2 : 1,
-                          color: isActive
-                              ? AppColors.primary
-                              : AppColors.dividerLight,
-                        ),
-                      ),
-                      child: Text(
-                        digit ?? '',
-                        style: AppTextStyles.headlineMedium(
-                          color: digit == null
-                              ? AppColors.dividerLight
-                              : context.textPrimaryColor,
-                        ),
-                      ),
-                    );
-                  }),
+              Pinput(
+                controller: _otpController,
+                focusNode: _otpFocusNode,
+                length: 6,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: _onOtpChanged,
+                onCompleted: (value) {
+                  if (!_autoVerifyFired) {
+                    _autoVerifyFired = true;
+                    _verify();
+                  }
+                },
+                textInputAction: TextInputAction.done,
+                separatorBuilder: (index) => const SizedBox(
+                  width: AppSpacing.xs + 4,
+                ),
+                hapticFeedbackType: HapticFeedbackType.lightImpact,
+                focusedPinTheme: PinTheme(
+                  width: 52.w,
+                  height: 60.h,
+                  textStyle: AppTextStyles.headlineMedium(
+                    color: context.textPrimaryColor,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: AppColors.primary,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                defaultPinTheme: PinTheme(
+                  width: 52.w,
+                  height: 60.h,
+                  textStyle: AppTextStyles.headlineMedium(
+                    color: context.textPrimaryColor,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: AppColors.dividerLight,
+                    ),
+                  ),
+                ),
+                submittedPinTheme: PinTheme(
+                  width: 52.w,
+                  height: 60.h,
+                  textStyle: AppTextStyles.headlineMedium(
+                    color: context.textPrimaryColor,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryUltraLight,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
               ),
               SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: _otpController,
-                focusNode: _otpFocusNode,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(6),
-                ],
-                autofocus: true,
-                showCursor: false,
-                style: const TextStyle(fontSize: 1, color: Colors.transparent),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  counterText: '',
-                ),
-                onChanged: _onOtpChanged,
-              ),
               Text(
                 strings[AppLocalization.otp_paste_hint] ??
                     'You can paste the code from your messages',

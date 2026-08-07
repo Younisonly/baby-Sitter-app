@@ -129,7 +129,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         icon: Icons.email_rounded,
                         label: strings[AppLocalization.channel_email] ??
                             'Email',
-                        subtitle: 'example@email.com',
                         onTap: () => setState(() {
                           _channelIsEmail = true;
                           _formKey.currentState?.reset();
@@ -143,7 +142,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         icon: Icons.sms_rounded,
                         label: strings[AppLocalization.channel_phone] ??
                             'Phone',
-                        subtitle: '+966 5X XXX XXXX',
                         onTap: () => setState(() {
                           _channelIsEmail = false;
                           _formKey.currentState?.reset();
@@ -214,14 +212,12 @@ class _ChannelCard extends StatelessWidget {
     required this.selected,
     required this.icon,
     required this.label,
-    required this.subtitle,
     required this.onTap,
   });
 
   final bool selected;
   final IconData icon;
   final String label;
-  final String subtitle;
   final VoidCallback onTap;
 
   @override
@@ -265,15 +261,6 @@ class _ChannelCard extends StatelessWidget {
                       ? AppColors.primary
                       : context.textPrimaryColor,
                 ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall(
-                  color: context.textSecondaryColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

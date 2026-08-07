@@ -107,9 +107,11 @@ class AuthController extends Controller
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        $user = User::where('email', $request->input('email'))
-            ->orWhere('phone', $request->input('phone'))
-            ->firstOrFail();
+        $user = User::where(
+            fn ($q) => $request->filled('email')
+                ? $q->where('email', $request->input('email'))
+                : $q->where('phone', $request->input('phone'))
+        )->firstOrFail();
 
         $channel = $request->filled('email') ? 'email' : 'phone';
 
@@ -160,9 +162,11 @@ class AuthController extends Controller
 
     public function requestLoginOtp(RequestLoginOtpRequest $request): JsonResponse
     {
-        $user = User::where('email', $request->input('email'))
-            ->orWhere('phone', $request->input('phone'))
-            ->firstOrFail();
+        $user = User::where(
+            fn ($q) => $request->filled('email')
+                ? $q->where('email', $request->input('email'))
+                : $q->where('phone', $request->input('phone'))
+        )->firstOrFail();
 
         if ($user->is_suspended) {
             return response()->json([
