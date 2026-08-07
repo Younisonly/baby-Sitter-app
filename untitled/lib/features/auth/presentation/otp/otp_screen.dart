@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,7 @@ class OtpScreen extends ConsumerStatefulWidget {
 class _OtpScreenState extends ConsumerState<OtpScreen> {
   final _otpController = TextEditingController();
   final _otpFocusNode = FocusNode();
+  Timer? _resendTimerHandle;
   int _resendTimer = 60;
   bool _canResend = false;
   bool _isResending = false;
@@ -39,20 +41,24 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   @override
   void dispose() {
+    _resendTimerHandle?.cancel();
     _otpController.dispose();
     _otpFocusNode.dispose();
     super.dispose();
   }
 
   void _startResendTimer() {
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        if (_resendTimer > 0) {
-          setState(() => _resendTimer--);
-          _startResendTimer();
-        } else {
-          setState(() => _canResend = true);
-        }
+    _resendTimerHandle?.cancel();
+    _resendTimerHandle = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendTimer > 0) {
+        setState(() => _resendTimer--);
+      } else {
+        timer.cancel();
+        setState(() => _canResend = true);
       }
     });
   }
@@ -89,9 +95,25 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     }
 
     if (authState.otpToken == null) {
-      context.showErrorSnackBar(
-        'Session expired, please request a new code',
+      final strings = AppLocalization.get(ref.read(languageProvider).code);
+      final resent = await ref.read(authProvider.notifier).resendOtp();
+      if (!mounted) return;
+      if (!resent) {
+        context.showErrorSnackBar(
+          ref.read(authProvider).error ??
+              (strings[AppLocalization.otp_session_expired] ??
+                  'Session expired, please request a new code'),
+        );
+        return;
+      }
+      context.showInfoSnackBar(
+        strings[AppLocalization.otp_session_expired] ??
+            'Your session expired. We sent you a new code — please use it',
       );
+      if (!mounted) return;
+      _otpController.clear();
+      _autoVerifyFired = false;
+      _otpFocusNode.requestFocus();
       return;
     }
 
@@ -116,17 +138,19 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       _canResend = false;
       _resendTimer = 60;
     });
-    await ref.read(authProvider.notifier).resendOtp();
+    final resent = await ref.read(authProvider.notifier).resendOtp();
     if (!mounted) return;
     setState(() => _isResending = false);
-    _startResendTimer();
-    final authState = ref.read(authProvider);
     final strings = AppLocalization.get(ref.read(languageProvider).code);
-    if (authState.error != null) {
-      context.showErrorSnackBar(authState.error ?? 'Please check your connection and try again');
-    } else {
+    if (resent) {
+      _startResendTimer();
       context.showSuccessSnackBar(
         strings[AppLocalization.code_resent] ?? 'Verification code resent',
+      );
+    } else {
+      _canResend = true;
+      context.showErrorSnackBar(
+        ref.read(authProvider).error ?? 'Please check your connection and try again',
       );
     }
   }
@@ -373,17 +397,19 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       _canResend = false;
       _resendTimer = 60;
     });
-    await ref.read(authProvider.notifier).resendOtp(channel: channel);
+    final resent = await ref.read(authProvider.notifier).resendOtp(channel: channel);
     if (!mounted) return;
     setState(() => _isResending = false);
-    _startResendTimer();
-    final authState = ref.read(authProvider);
     final strings = AppLocalization.get(ref.read(languageProvider).code);
-    if (authState.error != null) {
-      context.showErrorSnackBar(authState.error ?? 'Please check your connection and try again');
-    } else {
+    if (resent) {
+      _startResendTimer();
       context.showSuccessSnackBar(
         strings[AppLocalization.code_resent] ?? 'Verification code resent',
+      );
+    } else {
+      _canResend = true;
+      context.showErrorSnackBar(
+        ref.read(authProvider).error ?? 'Please check your connection and try again',
       );
     }
   }

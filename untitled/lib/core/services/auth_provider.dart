@@ -378,8 +378,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> resendOtp({String? channel}) async {
-    if (state.isLoading || state.otpToken == null) return;
+  Future<bool> resendOtp({String? channel}) async {
+    if (state.isLoading) return false;
     final targetChannel = channel ?? state.otpChannel;
     final email = targetChannel == 'email'
         ? (state.otpEmail ?? (state.otpContact.contains('@')
@@ -398,7 +398,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           const FormatException('missing_otp_contact'),
         ).message,
       );
-      return;
+      return false;
     }
 
     state = state.copyWith(isLoading: true, error: null);
@@ -408,17 +408,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
         phone: phone,
         channel: targetChannel,
       );
+      final newToken = data['otpToken']?.toString();
+      if (newToken == null || newToken.isEmpty) {
+        state = state.copyWith(
+          isLoading: false,
+          error: ErrorHandler.handle(
+            const FormatException('missing_otp_token'),
+          ).message,
+        );
+        return false;
+      }
       state = state.copyWith(
         isLoading: false,
-        otpToken: data['otpToken']?.toString(),
+        otpToken: newToken,
         otpChannel: data['channel']?.toString() ?? targetChannel,
         otpContact: targetChannel == 'email' ? (email ?? state.otpContact) : (phone ?? state.otpContact),
       );
+      return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: ErrorHandler.handle(e).message,
       );
+      return false;
     }
   }
 

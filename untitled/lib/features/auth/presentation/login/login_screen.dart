@@ -100,8 +100,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               channel: channel,
             );
         if (!mounted) return;
-        final otpContact = ref.read(authProvider).otpContact;
-        context.go('${AppRoutes.otp}?phone=${Uri.encodeComponent(otpContact)}');
+        final authState = ref.read(authProvider);
+        if (authState.otpToken != null && authState.otpMode == 'login') {
+          final otpContact = authState.otpContact;
+          context.go('${AppRoutes.otp}?phone=${Uri.encodeComponent(otpContact)}');
+        } else if (authState.error != null) {
+          context.showErrorSnackBar(
+            authState.error ?? 'Please check your connection and try again',
+          );
+        }
       }
 
       final hasBoth = hasEmail && hasPhone;

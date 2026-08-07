@@ -242,6 +242,7 @@ class AppLocalization {
   static const String enter_code = 'enter_code';
   static const String change_contact = 'change_contact';
   static const String code_resent = 'code_resent';
+  static const String otp_session_expired = 'otp_session_expired';
   static const String password_reset_success = 'password_reset_success';
   static const String code_expired = 'code_expired';
   static const String resend_in = 'resend_in';
@@ -1750,6 +1751,7 @@ class AppLocalization {
     enter_code: 'Enter Code',
     change_contact: 'Change',
     code_resent: 'Verification code resent',
+    otp_session_expired: 'Your session expired. We sent you a new code — please use it',
     password_reset_success: 'Password reset successfully',
     code_expired: 'Verification code expired. Please try again.',
     resend_in: 'Resend code in {seconds}s',
@@ -3187,6 +3189,7 @@ class AppLocalization {
     enter_code: 'إدخال الرمز',
     change_contact: 'تغيير',
     code_resent: 'تمت إعادة إرسال رمز التحقق',
+    otp_session_expired: 'انتهت صلاحية الجلسة، أرسلنا لك رمزاً جديداً — يرجى استخدامه',
     password_reset_success: 'تمت إعادة تعيين كلمة المرور بنجاح',
     code_expired: 'انتهت صلاحية رمز التحقق. يرجى المحاولة مرة أخرى.',
     resend_in: 'إعادة الإرسال خلال {seconds} ثانية',
