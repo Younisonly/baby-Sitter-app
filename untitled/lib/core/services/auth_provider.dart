@@ -46,11 +46,60 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier(this._ref, this._authRepository) : super(const AuthState()) {
+    _restoreOtpSession();
     _checkAuthStatus();
     _unauthorizedSub = AuthEventService.instance.unauthorizedStream.listen((_) {
       if (!mounted || _isLoggingOut) return;
       logout();
     });
+  }
+
+  Future<void> _restoreOtpSession() async {
+    final raw = await LocalStorage.getOtpSession();
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      final mode = json['otpMode']?.toString();
+      if (mode == null || mode.isEmpty) {
+        return;
+      }
+      final savedAt = json['savedAt'] as int? ?? 0;
+      if (savedAt > 0 && DateTime.now().millisecondsSinceEpoch - savedAt > 30 * 60 * 1000) {
+        await LocalStorage.clearOtpSession();
+        return;
+      }
+      state = state.copyWith(
+        otpToken: json['otpToken']?.toString(),
+        otpMode: mode,
+        otpChannel: json['otpChannel']?.toString() ?? 'email',
+        otpContact: json['otpContact']?.toString() ?? '',
+        otpEmail: json['otpEmail']?.toString(),
+        otpPhone: json['otpPhone']?.toString(),
+      );
+    } catch (_) {
+      await LocalStorage.clearOtpSession();
+    }
+  }
+
+  Future<void> _persistOtpSession() async {
+    final otpMode = state.otpMode;
+    if (otpMode == null || otpMode.isEmpty) {
+      await LocalStorage.clearOtpSession();
+      return;
+    }
+    await LocalStorage.saveOtpSession(jsonEncode({
+      'otpToken': state.otpToken,
+      'otpMode': otpMode,
+      'otpChannel': state.otpChannel,
+      'otpContact': state.otpContact,
+      'otpEmail': state.otpEmail,
+      'otpPhone': state.otpPhone,
+      'savedAt': DateTime.now().millisecondsSinceEpoch,
+    }));
+  }
+
+  Future<void> _clearOtpSession() async {
+    await LocalStorage.clearOtpSession();
   }
 
   StreamSubscription<void>? _unauthorizedSub;
@@ -274,6 +323,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           otpEmail: unverifiedEmail,
           otpPhone: unverifiedPhone,
         );
+        await _persistOtpSession();
         return {'needsVerification': true};
       }
       state = state.copyWith(
@@ -313,6 +363,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpEmail: email,
         otpPhone: phone,
       );
+      await _persistOtpSession();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -341,6 +392,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpEmail: email,
         otpPhone: phone,
       );
+      await _persistOtpSession();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -370,6 +422,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpEmail: email,
         otpPhone: phone,
       );
+      await _persistOtpSession();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -406,6 +459,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           otpChannel: data['channel']?.toString() ?? targetChannel,
           otpContact: state.otpContact,
         );
+        await _persistOtpSession();
         return true;
       } catch (e) {
         state = state.copyWith(
@@ -424,6 +478,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
         ? (state.otpPhone ??
             (state.otpContact.contains('@') ? null : state.otpContact))
         : null;
+
+    if (state.otpMode == null || state.otpMode!.isEmpty) {
+      state = state.copyWith(
+        error: ErrorHandler.handle(
+          const FormatException('otp_session_lost'),
+        ).message,
+      );
+      return false;
+    }
 
     if (state.otpMode == 'register') {
       state = state.copyWith(
@@ -466,6 +529,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpChannel: data['channel']?.toString() ?? targetChannel,
         otpContact: targetChannel == 'email' ? (email ?? state.otpContact) : (phone ?? state.otpContact),
       );
+      await _persistOtpSession();
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -515,6 +579,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       otpMode: null,
       isFromCache: false,
     );
+    await _clearOtpSession();
     await _ref.read(appStateProvider.notifier).syncFavoritesFromServer();
     await _registerDeviceToken();
     await _refreshRouter();
@@ -539,6 +604,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         otpToken: null,
         otpMode: null,
       );
+      await _clearOtpSession();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -627,9 +693,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (_) {}
     await SocialAuthService.signOut();
     await LocalStorage.logout();
+    final hadActiveOtp = state.otpMode != null;
+    if (!hadActiveOtp) {
+      await _clearOtpSession();
+    }
+    final preservedOtp = hadActiveOtp
+        ? AuthState(
+            otpToken: state.otpToken,
+            otpMode: state.otpMode,
+            otpChannel: state.otpChannel,
+            otpContact: state.otpContact,
+            otpEmail: state.otpEmail,
+            otpPhone: state.otpPhone,
+          )
+        : null;
     _ref.read(appStateProvider.notifier).clearFavorites();
     _ref.invalidate(favoriteSittersProvider);
-    state = const AuthState();
+    state = preservedOtp ?? const AuthState();
     _isLoggingOut = false;
     await _refreshRouter();
   }
@@ -639,6 +719,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _authRepository.deleteAccount();
     } catch (_) {}
     await LocalStorage.clear();
+    await _clearOtpSession();
     _ref.read(appStateProvider.notifier).clearFavorites();
     _ref.invalidate(favoriteSittersProvider);
     state = const AuthState();

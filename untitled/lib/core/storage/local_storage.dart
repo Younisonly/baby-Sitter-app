@@ -22,6 +22,7 @@ class LocalStorage {
   static const String _pendingDeepLinkKey = 'pending_deep_link';
   static const String _hasParentProfileKey = 'has_parent_profile';
   static const String _hasSitterProfileKey = 'has_sitter_profile';
+  static const String _otpSessionKey = 'otp_session';
 
   static SharedPreferences? _prefs;
   static Box? _cacheBox;
@@ -195,6 +196,18 @@ class LocalStorage {
 
   static Future<void> clearPendingDeepLink() async {
     await _prefs?.remove(_pendingDeepLinkKey);
+  }
+
+  static Future<void> saveOtpSession(String json) async {
+    await _prefs?.setString(_otpSessionKey, json);
+  }
+
+  static Future<String?> getOtpSession() async {
+    return _prefs?.getString(_otpSessionKey);
+  }
+
+  static Future<void> clearOtpSession() async {
+    await _prefs?.remove(_otpSessionKey);
   }
 
   static Future<void> clear() async {
