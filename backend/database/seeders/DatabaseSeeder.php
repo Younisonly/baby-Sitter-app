@@ -111,9 +111,9 @@ class DatabaseSeeder extends Seeder
 
         // Pre-generated avatar references (3 sitters with images, 2 without)
         $avatars = [
-            'https://images.unsplash.com/photo-1770374473979-4dbe57498d50?w=400&h=400&fit=crop&crop=faces&q=80&auto=format',
-            'https://images.unsplash.com/photo-1770796568095-2776d45840ed?w=400&h=400&fit=crop&crop=faces&q=80&auto=format',
-            'https://images.unsplash.com/photo-1772625717721-3422757d3ff0?w=400&h=400&fit=crop&crop=faces&q=80&auto=format',
+            'https://images.pexels.com/photos/13097074/pexels-photo-13097074.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+            'https://images.pexels.com/photos/13097057/pexels-photo-13097057.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+            'https://images.pexels.com/photos/35062125/pexels-photo-35062125.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
             null,
             null,
         ];
